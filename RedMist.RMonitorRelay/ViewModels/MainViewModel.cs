@@ -6,12 +6,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using RedMist.RMonitorRelay.Services;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using LogViewer.Core.ViewModels;
 
 namespace RedMist.RMonitorRelay.ViewModels;
 
 public partial class MainViewModel : ObservableValidator
 {
     private readonly ISettingsProvider settings;
+    private readonly RMonitorClient rMonitorClient;
+    public LogViewerControlViewModel LogViewer { get; }
 
     private string ip = string.Empty;
     [CustomValidation(typeof(MainViewModel), nameof(IpValidate))]
@@ -38,9 +41,17 @@ public partial class MainViewModel : ObservableValidator
     }
 
 
-    public MainViewModel(ISettingsProvider settings)
+    [ObservableProperty]
+    private bool isConnected = false;
+    [ObservableProperty]
+    private bool isConnectionBusy = false;
+
+
+    public MainViewModel(ISettingsProvider settings, RMonitorClient rMonitorClient, LogViewerControlViewModel logViewer)
     {
         this.settings = settings;
+        this.rMonitorClient = rMonitorClient;
+        LogViewer = logViewer;
     }
 
     public void LoadSettings()
@@ -67,6 +78,37 @@ public partial class MainViewModel : ObservableValidator
         }
     }
 
+
+    public async Task ConnectAsync()
+    {
+        IsConnectionBusy = true;
+        try
+        {
+            var result = await rMonitorClient.ConnectAsync(Ip, Port, default);
+            if (result)
+            {
+                IsConnected = true;
+            }
+        }
+        finally
+        {
+            IsConnectionBusy = false;
+        }
+    }
+
+    public async Task DisconnectAsync()
+    {
+        IsConnectionBusy = true;
+        try
+        {
+            await rMonitorClient.DisconnectAsync(default);
+        }
+        finally
+        {
+            IsConnected = false;
+            IsConnectionBusy = false;
+        }
+    }
 
     public static ValidationResult IpValidate(string host, ValidationContext context)
     {

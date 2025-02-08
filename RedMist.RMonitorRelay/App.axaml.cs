@@ -57,7 +57,7 @@ public partial class App : Application
             desktop.MainWindow = _host.Services.GetRequiredService<MainWindow>();
             desktop.ShutdownRequested += OnShutdownRequested;
         }
-       
+
         // Startup background services
         _ = _host.StartAsync(_cancellationTokenSource.Token);
 
@@ -73,6 +73,7 @@ public partial class App : Application
 
     [Singleton(typeof(MainViewModel))]
     [Singleton(typeof(LogViewerControlViewModel))]
+    [Singleton(typeof(RMonitorClient))]
     //[Singleton(typeof(QuarterViewModelFactory), typeof(IQuarterViewModelFactory))]
     internal static partial void ConfigureViewModels(IServiceCollection services);
 

@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace RedMist.RMonitorRelay.Services;
 
-class RMonitorService : BackgroundService
+/// <summary>
+/// Client for the Red Mist timing signalR hub.
+/// </summary>
+class HubClient : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
