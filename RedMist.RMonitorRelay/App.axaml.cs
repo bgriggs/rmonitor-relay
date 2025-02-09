@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using BigMission.Avalonia.LogViewer.Extensions;
 using CommunityToolkit.Extensions.DependencyInjection;
 using LogViewer.Core.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MsLogger.Core;
@@ -69,6 +70,10 @@ public partial class App : Application
 
 
     [Singleton(typeof(WindowsSettingsProvider), typeof(ISettingsProvider))]
+    [Singleton(typeof(WindowsConfiguration), typeof(IConfiguration))]
+    [Singleton(typeof(HubClient))]
+    [Singleton(typeof(EventDataCache))]
+    [Singleton(typeof(Relay))]
     internal static partial void ConfigureServices(IServiceCollection services);
 
     [Singleton(typeof(MainViewModel))]
