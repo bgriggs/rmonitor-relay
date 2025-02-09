@@ -1,0 +1,3 @@
+[submodule "BigMission.Shared"]
+	path = BigMission.Shared
+	url = https://github.com/bgriggs/bigmission-shared.git
