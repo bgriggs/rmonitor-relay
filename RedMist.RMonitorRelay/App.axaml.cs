@@ -36,7 +36,7 @@ public partial class App : Application
         var locator = new ViewLocator();
         DataTemplates.Add(locator);
 
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+        var builder = Host.CreateApplicationBuilder();
         builder.AddLogViewer().Logging.AddDefaultDataStoreLogger();
 
         var services = builder.Services;

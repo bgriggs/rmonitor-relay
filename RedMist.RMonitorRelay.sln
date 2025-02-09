@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedMist.ReplayRMonitorData", "RedMist.ReplayRMonitorData\RedMist.ReplayRMonitorData.csproj", "{05AA4A50-7656-4994-B196-4C2EC6F918FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{2A2E530D-CBB8-D0E9-EAB5-1BC7F19E66F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A2E530D-CBB8-D0E9-EAB5-1BC7F19E66F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A2E530D-CBB8-D0E9-EAB5-1BC7F19E66F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05AA4A50-7656-4994-B196-4C2EC6F918FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05AA4A50-7656-4994-B196-4C2EC6F918FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05AA4A50-7656-4994-B196-4C2EC6F918FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05AA4A50-7656-4994-B196-4C2EC6F918FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
