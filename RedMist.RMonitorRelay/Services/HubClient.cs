@@ -17,6 +17,7 @@ public class HubClient : HubClientBase
     private ILogger Logger { get; }
     public event Action? ReceivedSendEventData;
     private CancellationToken stoppingToken;
+    public int MessagesSent { get; private set; }
 
     public HubClient(ILoggerFactory loggerFactory, IConfiguration configuration) : base(loggerFactory, configuration)
     {
@@ -38,13 +39,14 @@ public class HubClient : HubClientBase
 
     public async Task<bool> SendAsync(int eventId, string data)
     {
-        if (hub is null)
+        if (hub is null || hub.State != HubConnectionState.Connected)
         {
-            Logger.LogWarning("Hub not connected, unable to send: {0}", data);
+            Logger.LogTrace("Hub not connected, unable to send: {0}", data);
             return false;
         }
 
         await hub.SendAsync("SendRMonitor", eventId, data, stoppingToken);
+        MessagesSent++;
         return true;
     }
 
@@ -52,12 +54,13 @@ public class HubClient : HubClientBase
     {
         try
         {
-            if (hub is null)
+            if (hub is null || hub.State != HubConnectionState.Connected)
             {
-                Logger.LogWarning("Hub not connected, unable to send event update");
+                Logger.LogTrace("Hub not connected, unable to send event update");
                 return;
             }
             await hub.SendAsync("SendEventUpdate", eventId, eventName, stoppingToken);
+            MessagesSent++;
         }
         catch (Exception ex)
         {

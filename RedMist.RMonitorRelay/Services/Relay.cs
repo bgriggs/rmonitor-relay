@@ -16,7 +16,6 @@ public class Relay
     private readonly EventDataCache eventDataCache;
     public event Action<HubConnectionState>? ConnectionStatusChanged;
     private int messagesReceived;
-    private int messagesSent;
     public event Action<(int rx, int tx)>? MessageCountChanged;
     private DateTime lastMessageCountChanged;
     private HubConnectionState lastState = HubConnectionState.Disconnected;
@@ -56,12 +55,7 @@ public class Relay
             messagesReceived++;
             await CheckForInit(data);
             await eventDataCache.Update(data);
-
-            bool sendResult = await hubClient.SendAsync(eventDataCache.EventNumber, data);
-            if (sendResult)
-            {
-                messagesSent++;
-            }
+            await hubClient.SendAsync(eventDataCache.EventNumber, data);
         }
         catch (Exception ex)
         {
@@ -76,7 +70,7 @@ public class Relay
         {
             if (DateTime.Now - lastMessageCountChanged > TimeSpan.FromSeconds(1))
             {
-                MessageCountChanged?.Invoke((messagesReceived, messagesSent));
+                MessageCountChanged?.Invoke((messagesReceived, hubClient.MessagesSent));
                 lastMessageCountChanged = DateTime.Now;
             }
         }
@@ -121,11 +115,7 @@ public class Relay
             Logger.LogDebug($"Sending {cached.Length} cached messages to hub");
             foreach (var c in cached)
             {
-                bool sendResult = await hubClient.SendAsync(eventDataCache.EventNumber, c);
-                if (sendResult)
-                {
-                    messagesSent++;
-                }
+                await hubClient.SendAsync(eventDataCache.EventNumber, c);
             }
         }
         catch (Exception ex)

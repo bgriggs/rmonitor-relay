@@ -15,7 +15,7 @@ class EventData
 
         foreach (var packet in packets)
         {
-            var tsLineEnd = packet.IndexOf("\n");
+            var tsLineEnd = packet.IndexOf('\n');
             if (tsLineEnd < 0)
                 continue;
             var tsLine = packet[..(tsLineEnd + 1)].Trim();
