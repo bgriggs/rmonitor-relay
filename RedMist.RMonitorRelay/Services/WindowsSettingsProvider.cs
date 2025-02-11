@@ -77,7 +77,10 @@ public class WindowsSettingsProvider : ISettingsProvider
     public string? GetWithOverride(string key)
     {
         var value = GetUser(key);
-        value ??= GetApp(key);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            value = GetApp(key);
+        }
         return value;
     }
 

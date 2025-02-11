@@ -16,6 +16,7 @@ public class HubClient : HubClientBase
     private HubConnection? hub;
     private ILogger Logger { get; }
     public event Action? ReceivedSendEventData;
+    private CancellationToken stoppingToken;
 
     public HubClient(ILoggerFactory loggerFactory, IConfiguration configuration) : base(loggerFactory, configuration)
     {
@@ -24,17 +25,18 @@ public class HubClient : HubClientBase
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        this.stoppingToken = stoppingToken;
         hub = StartConnection(stoppingToken);
         hub.On("SendEventData", () => ReceivedSendEventData?.Invoke());
 
         while (!stoppingToken.IsCancellationRequested)
         {
             FireStatusUpdate(hub);
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
 
-    public async Task<bool> SendAsync(string data)
+    public async Task<bool> SendAsync(int eventId, string data)
     {
         if (hub is null)
         {
@@ -42,7 +44,24 @@ public class HubClient : HubClientBase
             return false;
         }
 
-        await hub.SendAsync("Send", data);
+        await hub.SendAsync("SendRMonitor", eventId, data, stoppingToken);
         return true;
+    }
+
+    public async Task SendEventUpdate(int eventId, string eventName)
+    {
+        try
+        {
+            if (hub is null)
+            {
+                Logger.LogWarning("Hub not connected, unable to send event update");
+                return;
+            }
+            await hub.SendAsync("SendEventUpdate", eventId, eventName, stoppingToken);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send event update");
+        }
     }
 }

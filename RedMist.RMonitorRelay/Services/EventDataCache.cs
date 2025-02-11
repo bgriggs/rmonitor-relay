@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,13 +7,18 @@ namespace RedMist.RMonitorRelay.Services;
 
 public class EventDataCache
 {
-    private Dictionary<string, string> a = [];
-    private Dictionary<string, string> comp = [];
+    private readonly Dictionary<string, string> a = [];
+    private readonly Dictionary<string, string> comp = [];
     private string b = string.Empty;
-    private Dictionary<string, string> c = [];
-    private Dictionary<string, string> g = [];
-    private Dictionary<string, string> h = [];
-    private SemaphoreSlim semaphore = new(1, 1);
+    private readonly Dictionary<string, string> c = [];
+    private readonly Dictionary<string, string> g = [];
+    private readonly Dictionary<string, string> h = [];
+    private readonly SemaphoreSlim semaphore = new(1, 1);
+
+    public int EventNumber { get; set; }
+    public string EventName { get; set; } = string.Empty;
+    public event Action<(int eventId, string name)>? EventChanged;
+
 
     public async Task Update(string data)
     {
@@ -42,6 +48,12 @@ public class EventDataCache
                 else if (cmd == "$B")
                 {
                     b = p;
+                    if (int.TryParse(msgParts[1], out int en))
+                    {
+                        EventNumber = en;
+                    }
+                    EventName = msgParts[2];
+                    EventChanged?.Invoke((EventNumber, EventName));
                 }
                 // C - Class information
                 else if (cmd == "$C" && msgParts.Length > 1)
@@ -84,6 +96,7 @@ public class EventDataCache
             c.Clear();
             g.Clear();
             h.Clear();
+            EventNumber = 0;
         }
         finally
         {

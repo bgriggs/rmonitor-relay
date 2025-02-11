@@ -4,7 +4,7 @@ namespace RedMist.ReplayRMonitorData;
 
 class EventData
 {
-    private List<(DateTime ts, string data)> events = [];
+    private readonly List<(DateTime ts, string data)> events = [];
     private int replayIndex = 0;
     public int Count => events.Count;
 
@@ -20,7 +20,7 @@ class EventData
                 continue;
             var tsLine = packet[..(tsLineEnd + 1)].Trim();
             var ts = DateTime.ParseExact(tsLine, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-            var data = packet[(tsLineEnd + 1)..].Trim();
+            var data = packet[(tsLineEnd + 1)..];
             events.Add((ts, data));
         }
     }

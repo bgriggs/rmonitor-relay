@@ -33,6 +33,8 @@ public class Relay
 
         hubClient.ReceivedSendEventData += async () => await SendCachedMessagesAsync();
         hubClient.ConnectionStatusChanged += async (state) => await OnConnectionChanged(state);
+
+        eventDataCache.EventChanged += async (e) => await hubClient.SendEventUpdate(e.eventId, e.name);
     }
 
     public async Task<bool> StartAsync(string rmonitorIp, int rmonitorPort, CancellationToken cancellationToken = default)
@@ -55,7 +57,7 @@ public class Relay
             await CheckForInit(data);
             await eventDataCache.Update(data);
 
-            bool sendResult = await hubClient.SendAsync(data);
+            bool sendResult = await hubClient.SendAsync(eventDataCache.EventNumber, data);
             if (sendResult)
             {
                 messagesSent++;
@@ -110,10 +112,16 @@ public class Relay
         var cached = await eventDataCache.GetData();
         try
         {
+            if (eventDataCache.EventNumber > 0)
+            {
+                Logger.LogDebug("Sending event data to hub: {0}, {1}", eventDataCache.EventNumber, eventDataCache.EventName);
+                await hubClient.SendEventUpdate(eventDataCache.EventNumber, eventDataCache.EventName);
+            }
+
             Logger.LogDebug($"Sending {cached.Length} cached messages to hub");
             foreach (var c in cached)
             {
-                bool sendResult = await hubClient.SendAsync(c);
+                bool sendResult = await hubClient.SendAsync(eventDataCache.EventNumber, c);
                 if (sendResult)
                 {
                     messagesSent++;

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -49,12 +51,27 @@ public class RMonitorClient
             {
                 while (_client != null)
                 {
-                    var buffer = new byte[1024];
-                    var length = await _client.ReceiveAsync(buffer, cancellationToken);
-
-                    if (length > 0)
+                    var message = new List<byte>();
+                    
+                    //var length = await _client.ReceiveAsync(buffer, cancellationToken);
+                    int length = 0;
+                    do
                     {
-                        var data = Encoding.UTF8.GetString(buffer, 0, length);
+                        var buffer = new byte[1024];
+                        length = _client.Receive(buffer);
+                        if (length > 0)
+                        {
+                            message.AddRange(buffer[..length]);
+                            if (message.Last() == '\n')
+                            {
+                                break;
+                            }
+                        }
+                    } while (length > 0);
+
+                    if (message.Count > 0)
+                    {
+                        var data = Encoding.UTF8.GetString([.. message], 0, message.Count);
                         Logger.LogTrace("RX: {0}", data);
                         ReceivedData?.Invoke(data);
                     }
