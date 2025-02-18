@@ -112,11 +112,8 @@ public class Relay
                 await hubClient.SendEventUpdate(eventDataCache.EventNumber, eventDataCache.EventName);
             }
 
-            Logger.LogDebug($"Sending {cached.Length} cached messages to hub");
-            foreach (var c in cached)
-            {
-                await hubClient.SendAsync(eventDataCache.EventNumber, c);
-            }
+            Logger.LogDebug($"Sending cached messages to hub");
+            await hubClient.SendAsync(eventDataCache.EventNumber, cached);
         }
         catch (Exception ex)
         {

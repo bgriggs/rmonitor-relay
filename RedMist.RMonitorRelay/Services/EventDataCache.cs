@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ public class EventDataCache
     private string b = string.Empty;
     private readonly Dictionary<string, string> c = [];
     private readonly Dictionary<string, string> g = [];
+    private readonly Dictionary<string, string> gStarting = [];
     private readonly Dictionary<string, string> h = [];
     private readonly SemaphoreSlim semaphore = new(1, 1);
 
@@ -70,6 +72,11 @@ public class EventDataCache
                 {
                     var reg = msgParts[2];
                     g[reg] = p;
+                    var t = msgParts[4].Replace("\"", "").Trim();
+                    if (string.IsNullOrWhiteSpace(msgParts[3]) && t == "00:00:00.000")
+                    {
+                        gStarting[reg] = p;
+                    }
                 }
                 // H - Practice/qualifying information
                 else if (cmd == "$H" && msgParts.Length > 2)
@@ -95,6 +102,7 @@ public class EventDataCache
             b = string.Empty;
             c.Clear();
             g.Clear();
+            gStarting.Clear();
             h.Clear();
             EventNumber = 0;
         }
@@ -114,37 +122,41 @@ public class EventDataCache
         return data;
     }
 
-    public async Task<string[]> GetData()
+    public async Task<string> GetData()
     {
         await semaphore.WaitAsync();
         try
         {
-            var data = new List<string>();
+            var sb = new StringBuilder();
             foreach (var a in a.Values)
             {
-                data.Add(a);
+                sb.AppendLine(a);
             }
             foreach (var c in comp.Values)
             {
-                data.Add(c);
+                sb.AppendLine(c);
             }
             if (!string.IsNullOrEmpty(b))
             {
-                data.Add(b);
+                sb.AppendLine(b);
             }
             foreach (var c in c.Values)
             {
-                data.Add(c);
+                sb.AppendLine(c);
+            }
+            foreach (var gs in gStarting.Values)
+            {
+                sb.AppendLine(gs);
             }
             foreach (var g in g.Values)
             {
-                data.Add(g);
+                sb.AppendLine(g);
             }
             foreach (var h in h.Values)
             {
-                data.Add(h);
+                sb.AppendLine(h);
             }
-            return [.. data];
+            return sb.ToString();
         }
         finally
         {
