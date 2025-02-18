@@ -14,9 +14,9 @@ public class WindowsSettingsProvider : ISettingsProvider
     private readonly string userSettingsFile = "redmist-relay-settings.json";
 
     private readonly IConfiguration? appSettings;
-    private readonly string appSettingsFile = "appsettings.json";
+    //private readonly string appSettingsFile = "appsettings.json";
 
-    public WindowsSettingsProvider()
+    public WindowsSettingsProvider(IConfiguration appSettings)
     {
         var store = IsolatedStorageFile.GetUserStoreForAssembly();
         if (store.FileExists(userSettingsFile))
@@ -27,14 +27,15 @@ public class WindowsSettingsProvider : ISettingsProvider
             userSettings = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? [];
         }
 
-        var dir = Directory.GetCurrentDirectory();
-        var appSettingsPath = Path.Combine(dir, appSettingsFile);
-        if (!string.IsNullOrEmpty(appSettingsPath) && File.Exists(appSettingsPath))
-        {
-            var cb = new ConfigurationBuilder();
-            cb.AddJsonFile(appSettingsPath);
-            appSettings = cb.Build();
-        }
+        //var dir = Directory.GetCurrentDirectory();
+        //var appSettingsPath = Path.Combine(dir, appSettingsFile);
+        //if (!string.IsNullOrEmpty(appSettingsPath) && File.Exists(appSettingsPath))
+        //{
+        //    var cb = new ConfigurationBuilder();
+        //    cb.AddJsonFile(appSettingsPath);
+        //    appSettings = cb.Build();
+        //}
+        this.appSettings = appSettings;
     }
 
     public string? GetUser(string key)

@@ -70,7 +70,7 @@ public partial class App : Application
 
 
     [Singleton(typeof(WindowsSettingsProvider), typeof(ISettingsProvider))]
-    [Singleton(typeof(WindowsConfiguration), typeof(IConfiguration))]
+    //[Singleton(typeof(WindowsConfiguration), typeof(IConfiguration))]
     [Singleton(typeof(HubClient))]
     [Singleton(typeof(EventDataCache))]
     [Singleton(typeof(Relay))]

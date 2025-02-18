@@ -128,6 +128,8 @@ public class EventDataCache
         try
         {
             var sb = new StringBuilder();
+            // Force a reset on the server
+            sb.AppendLine("$I, \"00:00:00\", \"0/0/0000\"");
             foreach (var a in a.Values)
             {
                 sb.AppendLine(a);
