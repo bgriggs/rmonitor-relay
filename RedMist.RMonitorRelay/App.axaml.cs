@@ -5,7 +5,6 @@ using Avalonia.Markup.Xaml;
 using BigMission.Avalonia.LogViewer.Extensions;
 using CommunityToolkit.Extensions.DependencyInjection;
 using LogViewer.Core.ViewModels;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MsLogger.Core;
@@ -70,7 +69,6 @@ public partial class App : Application
 
 
     [Singleton(typeof(WindowsSettingsProvider), typeof(ISettingsProvider))]
-    //[Singleton(typeof(WindowsConfiguration), typeof(IConfiguration))]
     [Singleton(typeof(HubClient))]
     [Singleton(typeof(EventDataCache))]
     [Singleton(typeof(Relay))]
@@ -79,9 +77,32 @@ public partial class App : Application
     [Singleton(typeof(MainViewModel))]
     [Singleton(typeof(LogViewerControlViewModel))]
     [Singleton(typeof(RMonitorClient))]
-    //[Singleton(typeof(QuarterViewModelFactory), typeof(IQuarterViewModelFactory))]
     internal static partial void ConfigureViewModels(IServiceCollection services);
 
     [Singleton(typeof(MainView))]
     internal static partial void ConfigureViews(IServiceCollection services);
+
+    private void TrayIcon_Clicked(object? sender, System.EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (desktop.MainWindow is { IsVisible: false })
+            {
+                desktop.MainWindow.Show();
+            }
+        }
+    }
+
+    private void OpenMenuItem_Click(object? sender, System.EventArgs e)
+    {
+        TrayIcon_Clicked(null, new System.EventArgs());
+    }
+
+    private void ExitMenuItem_Click(object? sender, System.EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
 }

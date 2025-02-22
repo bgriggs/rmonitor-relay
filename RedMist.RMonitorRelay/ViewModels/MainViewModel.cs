@@ -1,11 +1,12 @@
-﻿using Avalonia.Controls;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LogViewer.Core.ViewModels;
-using Microsoft.AspNetCore.SignalR.Client;
 using RedMist.RMonitorRelay.Services;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -52,6 +53,9 @@ public partial class MainViewModel : ObservableValidator
     private int messagesReceived;
     [ObservableProperty]
     private int messagesSent;
+    [ObservableProperty]
+    private bool? enableLogMessages = true;
+
 
     public MainViewModel(ISettingsProvider settings, Relay relay, LogViewerControlViewModel logViewer)
     {
@@ -72,7 +76,10 @@ public partial class MainViewModel : ObservableValidator
                 MessagesSent = count.tx;
             });
         };
+
+        relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }
+
 
     public void LoadSettings()
     {
@@ -96,8 +103,11 @@ public partial class MainViewModel : ObservableValidator
         {
             settings.SaveUser("Keycloak:ClientSecret", ClientSecret);
         }
+        else if (e.PropertyName == nameof(EnableLogMessages))
+        {
+            relay.SetLocalMessageLogging(EnableLogMessages ?? false);
+        }
     }
-
 
     public async Task ConnectAsync()
     {
@@ -138,5 +148,20 @@ public partial class MainViewModel : ObservableValidator
         }
 
         return new ValidationResult("IP Address is not valid");
+    }
+
+    public void OpenLogs()
+    {
+        var path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+        path = Path.Combine(path, "RedMist");
+        if (Directory.Exists(path))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = path,
+                UseShellExecute = true
+            });
+        }
     }
 }

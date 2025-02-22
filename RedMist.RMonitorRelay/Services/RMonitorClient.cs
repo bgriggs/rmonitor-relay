@@ -52,8 +52,6 @@ public class RMonitorClient
                 while (_client != null)
                 {
                     var message = new List<byte>();
-                    
-                    //var length = await _client.ReceiveAsync(buffer, cancellationToken);
                     int length = 0;
                     do
                     {

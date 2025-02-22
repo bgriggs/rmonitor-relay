@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +21,7 @@ public class Relay
     public event Action<(int rx, int tx)>? MessageCountChanged;
     private DateTime lastMessageCountChanged;
     private HubConnectionState lastState = HubConnectionState.Disconnected;
+    private FileStream? localLoggingStream;
 
     private ILogger Logger { get; }
 
@@ -134,6 +137,45 @@ public class Relay
                 Logger.LogInformation("RMonitor init data received. Clearing Cache.");
                 await eventDataCache.Clear();
             }
+        }
+    }
+
+    public void SetLocalMessageLogging(bool enabled)
+    {
+        if (enabled)
+        {
+            rMonitorClient.ReceivedData += LogLocalMessage;
+        }
+        else
+        {
+            rMonitorClient.ReceivedData -= LogLocalMessage;
+        }
+    }
+
+    private void LogLocalMessage(string data)
+    {
+        try
+        {
+            if (localLoggingStream is null)
+            {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                path = Path.Combine(path, "RedMist");
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                path = Path.Combine(path, $"redmist-relay-messages{DateTime.Now:HH-mm-ss-MM-dd-yyyy}.log");
+                Logger.LogInformation("Logging local messages to {0}", path);
+                localLoggingStream = File.OpenWrite(path);
+            }
+
+            var buf = Encoding.UTF8.GetBytes($"##{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}{Environment.NewLine}{data}{Environment.NewLine}");
+            localLoggingStream.Write(buf);
+            localLoggingStream.Flush();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to log local message");
         }
     }
 }

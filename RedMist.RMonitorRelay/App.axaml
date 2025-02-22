@@ -4,7 +4,7 @@
 			 x:Class="RedMist.RMonitorRelay.App"
 			 xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
 	<Application.Styles>
 		<actipro:ModernTheme Includes="NativeDataGrid"/>
@@ -13,17 +13,12 @@
 	<TrayIcon.Icons>
 		<TrayIcons>
 			<TrayIcon Icon="/Assets/redmist.ico"
-					  ToolTipText="Avalonia Tray Icon ToolTip">
+					  ToolTipText="Red Mist Relay"
+					  Clicked="TrayIcon_Clicked">
 				<TrayIcon.Menu>
 					<NativeMenu>
-						<NativeMenuItem Header="Settings">
-							<NativeMenu>
-								<NativeMenuItem Header="Option 1"   />
-								<NativeMenuItem Header="Option 2"   />
-								<NativeMenuItemSeparator />
-								<NativeMenuItem Header="Option 3"  />
-							</NativeMenu>
-						</NativeMenuItem>
+						<NativeMenuItem Header="Open" Click="OpenMenuItem_Click" />
+						<NativeMenuItem Header="Exit" Click="ExitMenuItem_Click" />
 					</NativeMenu>
 				</TrayIcon.Menu>
 			</TrayIcon>

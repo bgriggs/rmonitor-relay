@@ -3,15 +3,34 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RedMist.RMonitorRelay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.RMonitorRelay.ViewModels.Design"
              xmlns:lc="clr-namespace:BigMission.Avalonia.LogViewer;assembly=BigMission.Avalonia.LogViewer"
 			 mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="480"
              x:Class="RedMist.RMonitorRelay.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="design:DesignMainViewModel">
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-		<vm:MainViewModel />
+		<design:DesignMainViewModel />
 	</Design.DataContext>
+
+	<UserControl.Styles>
+		<Style Selector="Button.hyperlink">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<TextBlock Text="{TemplateBinding Content}" Foreground="Blue" TextDecorations="Underline">
+						<TextBlock.Styles>
+							<Style Selector="TextBlock:pointerover">
+								<Setter Property="Foreground" Value="Red"/>
+							</Style>
+						</TextBlock.Styles>
+					</TextBlock>
+				</ControlTemplate>
+			</Setter>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+		</Style>
+	</UserControl.Styles>
 
 	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*">
 		<TextBlock Text="RMonitor Orbits Scoreboard Endpoint" Classes="theme-text-heading size-sm" Margin="12,3,3,3" Grid.Row="0"/>
@@ -29,9 +48,12 @@
 		<TextBlock Text="Red Mist Client Secret" Classes="theme-text-heading size-sm" Margin="12,8,3,3" Grid.Row="2"/>
 		<TextBox Text="{Binding ClientSecret}" Margin="12,2,3,3" Grid.Row="3" Width="250" HorizontalAlignment="Left" PasswordChar="*" Watermark="Enter your client secret"/>
 		<StackPanel Grid.Row="4" HorizontalAlignment="Left" Margin="12,2,3,3" Orientation="Horizontal">
-			<TextBlock Text="{Binding HubConnectionState, StringFormat='Server Connection: {0}'}}"/>
+			<TextBlock Text="{Binding HubConnectionState, StringFormat='Server: {0}'}}"/>
 			<TextBlock Text="{Binding MessagesSent, StringFormat='Messages sent: {0}'}}" Margin="15,0,0,0"/>
+			<CheckBox Content="Log Received Messages" IsChecked="{Binding EnableLogMessages}" Margin="35,0,0,0"/>
+			<Button Content="open" Margin="3,0,0,0" Command="{Binding OpenLogs}" Classes="hyperlink"/>
 		</StackPanel>
+		
 		<TextBlock Text="Logs" Classes="theme-text-heading size-sm" Margin="12,8,3,3" Grid.Row="5"/>
 		<lc:LogViewerControl DataContext="{Binding LogViewer}" Grid.Row="6" Height="300"/>
 	</Grid>
