@@ -13,6 +13,10 @@ $ErrorActionPreference = "Stop"
 
 Write-Output "Working directory: $pwd"
 
+Write-Output "Getting submodules" 
+git submodule update --init --recursive --remote
+xcopy "BigMission.Shared" "..\BigMission.Shared" /E /I /Y
+
 # Find MSBuild.
 $msBuildPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
     -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe `
