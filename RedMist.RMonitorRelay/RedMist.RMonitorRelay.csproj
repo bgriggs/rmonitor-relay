@@ -11,26 +11,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.2.3" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+		<PackageReference Include="Avalonia" Version="11.2.4" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.4" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.4" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 
 		<PackageReference Include="ActiproSoftware.Controls.Avalonia" Version="25.1.1" />
 		<PackageReference Include="ActiproSoftware.Controls.Avalonia.Themes.DataGrid" Version="25.1.1" />
 		<PackageReference Include="BigMission.Avalonia.LogViewer" Version="1.0.2" />
-		<PackageReference Include="CommunityToolkit.Labs.Extensions.DependencyInjection" Version="0.1.240213-build.1640" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+		<PackageReference Include="CommunityToolkit.Labs.Extensions.DependencyInjection" Version="0.1.250128-build.2031" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.2" />
 		
 		<PackageReference Include="DialogHost.Avalonia" Version="0.9.2" />
-		<PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="9.0.1">
+		<PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="9.0.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
-		<PackageReference Include="System.Text.Json" Version="9.0.1" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.4" />
+		<PackageReference Include="System.Text.Json" Version="9.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>

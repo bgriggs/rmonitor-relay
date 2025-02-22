@@ -83,7 +83,7 @@ public partial class MainViewModel : ObservableValidator
 
     public void LoadSettings()
     {
-        Ip = settings.GetWithOverride("RMonitorIP") ?? string.Empty;
+        Ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
         Port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var port) ? port : 50000;
         ClientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
     }
