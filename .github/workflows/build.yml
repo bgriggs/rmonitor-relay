@@ -16,9 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Update submodule
-      run: |
-        git submodule update --init --recursive --remote ../BigMission.Shared
+      with:
+        submodules: recursive
+    # - name: Update submodule
+    #   run: |
+    #     git submodule update --init --recursive --remote BigMission.Shared
     - name: dir
       run: |
         dir
