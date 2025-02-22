@@ -905,7 +905,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>4pg/zcFJXCKhf/xVOQvQ+lY/p/rj7RIQutQNlAE/vEw=</dsig:DigestValue>
+      <dsig:DigestValue>MslACWZ/MKtgzMWUR1zna/XRvvCqCT8FwjF278gEebM=</dsig:DigestValue>
     </hash>
   </file>
   <file name="RedMist.RMonitorRelay.Desktop.exe" size="145408">
@@ -914,7 +914,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>/9x4PXos9LqmuAca35gSES/LiYg0e6z3IwF2xqZU3Xg=</dsig:DigestValue>
+      <dsig:DigestValue>sWf1zWJYIe/4sT/o2xF3JOdG0DJ43uRliAW7eIn2fyA=</dsig:DigestValue>
     </hash>
   </file>
   <file name="RedMist.RMonitorRelay.Desktop.runtimeconfig.json" size="515">
@@ -932,7 +932,7 @@
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>3RWXkjEQNb5FSsURkVXXqoQL/FT9LeTuC2qWPywB0dA=</dsig:DigestValue>
+      <dsig:DigestValue>2lQIdNhLe9dL1t5hPPzdKyLNfmF6XBTTNZP5DYIppVk=</dsig:DigestValue>
     </hash>
   </file>
   <file name="SkiaSharp.dll" size="437808">
