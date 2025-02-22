@@ -6,7 +6,7 @@ param (
 )
 
 $appName = "RedMist.RMonitorRelay.Desktop"
-$projDir = "RedMist.RMonitorRelay\RedMist.RMonitorRelay.Desktop"
+$projDir = "RedMist.RMonitorRelay.Desktop"
 
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
