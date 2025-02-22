@@ -24,6 +24,9 @@ jobs:
     - name: dir
       run: |
         dir
+    - name: move Shared
+      run: |
+        xcopy "BigMission.Shared" "..\BigMission.Shared" /E /I /Y
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
