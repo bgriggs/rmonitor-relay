@@ -20,7 +20,7 @@ jobs:
         submodules: 'recursive'
     - name: Update submodule
       run: |
-        git submodule update --init --recursive --remote
+        git submodule update --init --recursive --remote BigMission.Shared
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
