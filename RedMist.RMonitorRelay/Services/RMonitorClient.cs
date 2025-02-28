@@ -32,7 +32,7 @@ public class RMonitorClient
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested && _client != null)
                 {
                     try
                     {
