@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -21,26 +22,54 @@ public class RMonitorClient
         Logger = loggerFactory.CreateLogger(GetType().Name);
     }
 
-    public async Task<bool> ConnectAsync(string ip, int port, CancellationToken cancellationToken)
+    public Task<bool> ConnectAsync(string ip, int port, CancellationToken cancellationToken)
     {
         var ipAddr = IPAddress.Parse(ip);
         var localEndPoint = new IPEndPoint(ipAddr, port);
         _client = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         Logger.LogInformation("RMonitor client connecting to {0}", localEndPoint);
-        try
+        _ = Task.Run(async () =>
         {
-            await _client.ConnectAsync(localEndPoint, cancellationToken);
-            Logger.LogInformation("RMonitor client connected to {0}", localEndPoint);
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        if (!_client.Connected)
+                        {
+                            if (_client != null)
+                            {
+                                try
+                                {
+                                    _client.Dispose();
+                                }
+                                catch { }
+                            }
 
-            StartReceive(cancellationToken);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "RMonitor client failed to connect to {0}", localEndPoint);
-        }
+                            _client = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-        return false;
+                            await _client.ConnectAsync(localEndPoint, cancellationToken);
+                            Logger.LogInformation("RMonitor client connected to {0}", localEndPoint);
+
+                            StartReceive(cancellationToken);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "RMonitor client failed to connect to {0}", localEndPoint);
+                    }
+
+                    await Task.Delay(1000, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "RMonitor client failed to connect to {0}", localEndPoint);
+            }
+        }, cancellationToken);
+
+        return Task.FromResult(true);
     }
 
     private void StartReceive(CancellationToken cancellationToken)

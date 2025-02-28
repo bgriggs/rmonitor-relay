@@ -7,7 +7,7 @@ namespace RedMist.ReplayRMonitorData;
 internal class Program
 {
     const string TEST_FILE = "ec-test-data.txt";
-    const double REPLAY_SPEED = 10.0;
+    const double REPLAY_SPEED = 2.0;
 
     static void Main(string[] args)
     {
