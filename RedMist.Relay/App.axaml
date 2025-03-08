@@ -1,0 +1,27 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 x:Class="RedMist.Relay.App"
+			 xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             RequestedThemeVariant="Default">
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+	<Application.Styles>
+		<actipro:ModernTheme Includes="NativeDataGrid"/>
+		<dialogHostAvalonia:DialogHostStyles/>
+	</Application.Styles>
+	<TrayIcon.Icons>
+		<TrayIcons>
+			<TrayIcon Icon="/Assets/redmist.ico"
+					  ToolTipText="Red Mist Relay"
+					  Clicked="TrayIcon_Clicked">
+				<TrayIcon.Menu>
+					<NativeMenu>
+						<NativeMenuItem Header="Open" Click="OpenMenuItem_Click" />
+						<NativeMenuItem Header="Exit" Click="ExitMenuItem_Click" />
+					</NativeMenu>
+				</TrayIcon.Menu>
+			</TrayIcon>
+		</TrayIcons>
+	</TrayIcon.Icons>
+</Application>

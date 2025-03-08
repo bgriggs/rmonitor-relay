@@ -5,8 +5,8 @@ param (
     [switch]$OnlyBuild=$false
 )
 
-$appName = "RedMist.RMonitorRelay.Desktop"
-$projDir = "RedMist.RMonitorRelay.Desktop"
+$appName = "RedMist.Relay.Desktop"
+$projDir = "RedMist.Relay.Desktop"
 
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
