@@ -1,0 +1,133 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<DrawingImage x:Key="editicon">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+				<GeometryDrawing Geometry="F1 M24,24z M0,0z M11,4L4,4A2,2,0,0,0,2,6L2,20A2,2,0,0,0,4,22L18,22A2,2,0,0,0,20,20L20,13">
+					<GeometryDrawing.Pen>
+						<Pen Brush="#FF000000" Thickness="2" LineCap="Round" LineJoin="Round" />
+					</GeometryDrawing.Pen>
+				</GeometryDrawing>
+				<GeometryDrawing Geometry="F1 M24,24z M0,0z M18.5,2.5A2.121,2.121,0,0,1,21.5,5.5L12,15 8,16 9,12 18.5,2.5z">
+					<GeometryDrawing.Pen>
+						<Pen Brush="#FF000000" Thickness="2" LineCap="Round" LineJoin="Round" />
+					</GeometryDrawing.Pen>
+				</GeometryDrawing>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<DrawingImage x:Key="closeicon">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup.Transform>
+					<TranslateTransform X="0" Y="6.4000000953674316" />
+				</DrawingGroup.Transform>
+				<DrawingGroup Transform="0.0528168999008943,0,0,-0.0528168999008943,-3.04225335369932,47.6619717978197">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M966.4,761.6L825.6,902.4 512,582.4 198.4,902.4 57.5999999999999,761.6 377.6,448 57.5999999999999,134.4 198.4,-6.39999999999992 512,313.6 825.6,-6.39999999999992 966.4,134.4 646.4,448z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<DrawingImage x:Key="addicon">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup Transform="0.295384615384615,0,0,-0.295384615384615,-3.69230769230769,55.3846153846154">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M175,112.5L175,100 100,100 100,25 87.5,25 87.5,100 12.5,100 12.5,112.5 87.5,112.5 87.5,187.5 100,187.5 100,112.5 175,112.5z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<!--Check-->
+	<DrawingImage x:Key="checkicon">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup Transform="0.0967741935483871,0,0,0.0967741935483871,-0.774193548387097,-0.774193548387097">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M256,8C119.033,8 8,119.033 8,256 8,392.967 119.033,504 256,504 392.967,504 504,392.967 504,256 504,119.033 392.967,8 256,8z M256,56C366.532,56 456,145.451 456,256 456,366.532 366.549,456 256,456 145.468,456 56,366.549 56,256 56,145.468 145.451,56 256,56 M396.204,186.267L373.668,163.549C369.001,158.844,361.403,158.813,356.698,163.481L215.346,303.697 155.554,243.42C150.887,238.715,143.289,238.684,138.584,243.351L115.865,265.887C111.16,270.554,111.129,278.152,115.797,282.858L206.578,374.374C211.245,379.079,218.843,379.11,223.548,374.442L396.137,203.238C400.841,198.57,400.871,190.972,396.204,186.267z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<DrawingImage x:Key="helpCircleOutline">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup Transform="2.4,0,0,2.4,-4.8,-4.8">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M11,18L13,18 13,16 11,16 11,18 M12,2A10,10,0,0,0,2,12A10,10,0,0,0,12,22A10,10,0,0,0,22,12A10,10,0,0,0,12,2 M12,20C7.59,20 4,16.41 4,12 4,7.59 7.59,4 12,4 16.41,4 20,7.59 20,12 20,16.41 16.41,20 12,20 M12,6A4,4,0,0,0,8,10L10,10A2,2,0,0,1,12,8A2,2,0,0,1,14,10C14,12,11,11.75,11,15L13,15C13,12.75,16,12.5,16,10A4,4,0,0,0,12,6z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<DrawingImage x:Key="folderOpenLineDrawing">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup Transform="0.0468292682926829,0,0,-0.0468292682926829,-4.68292682926829,52.0975609756098">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M150,150A50,50,0,0,0,100,200L100,1000A50,50,0,0,0,150,1050L520.7,1050 620.7,950 1000,950A50,50,0,0,0,1050,900L1050,750 950,750 950,850 579.3,850 479.3,950 200,950 200,350.1 275,650 1125,650 1009.5,187.85A50,50,0,0,0,961,150L150,150z M996.9,550L353.1,550 278.1,250 921.9,250 996.9,550z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<DrawingImage x:Key="informationOutlineDrawing">
+		<DrawingImage.Drawing>
+			<DrawingGroup ClipGeometry="M0,0 V48 H48 V0 H0 Z">
+				<DrawingGroup Transform="2.4,0,0,2.4,-4.8,-4.8">
+					<GeometryDrawing Brush="#FF000000" Geometry="F1 M48,48z M0,0z M11,9L13,9 13,7 11,7 M12,20C7.59,20 4,16.41 4,12 4,7.59 7.59,4 12,4 16.41,4 20,7.59 20,12 20,16.41 16.41,20 12,20 M12,2A10,10,0,0,0,2,12A10,10,0,0,0,12,22A10,10,0,0,0,22,12A10,10,0,0,0,12,2 M11,17L13,17 13,11 11,11 11,17z">
+						<GeometryDrawing.Pen>
+							<Pen Brush="#FF000000" Thickness="1" LineCap="Flat" LineJoin="Miter" />
+						</GeometryDrawing.Pen>
+					</GeometryDrawing>
+				</DrawingGroup>
+			</DrawingGroup>
+		</DrawingImage.Drawing>
+	</DrawingImage>
+
+	<Design.PreviewWith>
+		<StackPanel>
+			<Border Width="25">
+				<Image Source="{StaticResource editicon}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource closeicon}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource addicon}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource checkicon}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource helpCircleOutline}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource folderOpenLineDrawing}"/>
+			</Border>
+			<Border Width="25">
+				<Image Source="{StaticResource informationOutlineDrawing}"/>
+			</Border>
+		</StackPanel>
+	</Design.PreviewWith>
+</ResourceDictionary>

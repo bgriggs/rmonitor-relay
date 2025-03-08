@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="200"
+             x:Class="RedMist.Relay.Views.OrganizationView"
+			 x:DataType="vm:OrganizationViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignOrganizationViewModel />
+	</Design.DataContext>
+	<StackPanel>
+		<Grid ColumnDefinitions="Auto,*,Auto">
+			<TextBlock Classes="theme-text-heading size-sm" Text="Red Mist Cloud"/>
+			<Button Classes="icon" Command="{Binding EditOrganization}" Grid.Column="2" Margin="3,0,3,0">
+				<Image Source="{StaticResource editicon}" Width="20" Height="16" Margin="0,0,0,0"/>
+			</Button>
+		</Grid>
+		<TextBlock Text="{Binding OrgName}" Classes="theme-text-heading size-xs" Margin="3,0,0,0"/>
+		<TextBlock Text="Status: " Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="3,0,0,0"/>
+		<TextBlock Text="Messages Sent: " Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="3,0,0,0"/>
+	</StackPanel>
+</UserControl>

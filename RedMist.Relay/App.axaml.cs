@@ -4,6 +4,7 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using BigMission.Avalonia.LogViewer.Extensions;
 using CommunityToolkit.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using LogViewer.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,6 +55,9 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var provider = services.BuildServiceProvider();
+            Ioc.Default.ConfigureServices(provider);
+
             desktop.MainWindow = _host.Services.GetRequiredService<MainWindow>();
             desktop.ShutdownRequested += OnShutdownRequested;
         }
@@ -72,14 +76,17 @@ public partial class App : Application
     [Singleton(typeof(HubClient))]
     [Singleton(typeof(EventDataCache))]
     [Singleton(typeof(Services.Relay))]
+    [Singleton(typeof(RMonitorClient))]
+    [Singleton(typeof(OrganizationClient))]
+    [Singleton(typeof(EventManagementClient))]
     internal static partial void ConfigureServices(IServiceCollection services);
 
     [Singleton(typeof(MainViewModel))]
     [Singleton(typeof(LogViewerControlViewModel))]
-    [Singleton(typeof(RMonitorClient))]
     internal static partial void ConfigureViewModels(IServiceCollection services);
 
     [Singleton(typeof(MainView))]
+    [Singleton(typeof(EditOrganizationDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
 
     private void TrayIcon_Clicked(object? sender, System.EventArgs e)

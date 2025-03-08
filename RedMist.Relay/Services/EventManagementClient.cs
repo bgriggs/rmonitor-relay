@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.Services;
 
-internal class EventManagementClient
+public class EventManagementClient
 {
     private readonly RestClient restClient;
 

@@ -5,11 +5,73 @@
 			 xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              RequestedThemeVariant="Default">
 	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="/Assets/Icons.axaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Application.Resources>
+	
 	<Application.Styles>
 		<actipro:ModernTheme Includes="NativeDataGrid"/>
 		<dialogHostAvalonia:DialogHostStyles/>
+
+		<Style Selector="Button.icon">
+			<Setter Property="Height" Value="20"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="3"/>
+		</Style>
+		<Style Selector="Button.ws">
+			<Setter Property="Width" Value="21"/>
+			<Setter Property="Height" Value="20"/>
+			<Setter Property="Padding" Value="1,0"/>
+			<Setter Property="Margin" Value="1,2,0,2"/>
+			<Setter Property="VerticalAlignment" Value="Bottom"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+		</Style>
+		<Style Selector="Button.ok">
+			<Setter Property="IsDefault" Value="true"/>
+			<Setter Property="Content">
+				<Setter.Value>
+					<Template>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="OK"/>
+							<Image Source="{StaticResource checkicon}" Width="11" Margin="4,2,0,0"/>
+						</StackPanel>
+					</Template>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style Selector="Button.cancel">
+			<Setter Property="IsCancel" Value="true"/>
+			<Setter Property="Content">
+				<Setter.Value>
+					<Template>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Cancel" VerticalAlignment="Center"/>
+							<Image Source="{StaticResource closeicon}" Width="11" Margin="4,2,0,0"/>
+						</StackPanel>
+					</Template>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style Selector="Button.close">
+			<Setter Property="IsCancel" Value="true"/>
+			<Setter Property="Content">
+				<Setter.Value>
+					<Template>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Close" VerticalAlignment="Center"/>
+							<Image Source="{StaticResource closeicon}" Width="11" Margin="4,2,0,0"/>
+						</StackPanel>
+					</Template>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</Application.Styles>
+	
+	<!--Tray-->
 	<TrayIcon.Icons>
 		<TrayIcons>
 			<TrayIcon Icon="/Assets/redmist.ico"

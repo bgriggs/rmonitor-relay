@@ -22,6 +22,7 @@ public class ViewLocator : IDataTemplate
     public ViewLocator()
     {
         RegisterViewFactory<MainViewModel, MainView>();
+        RegisterViewFactory<EditOrganizationDialogViewModel, EditOrganizationDialog>();
     }
 
     public Control Build(object? data)

@@ -3,9 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:v="clr-namespace:RedMist.Relay.Views"
 			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
              xmlns:lc="clr-namespace:BigMission.Avalonia.LogViewer;assembly=BigMission.Avalonia.LogViewer"
-			 mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="480"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480"
              x:Class="RedMist.Relay.Views.MainView"
              x:DataType="design:DesignMainViewModel">
 	<Design.DataContext>
@@ -31,8 +34,66 @@
 			<Setter Property="BorderThickness" Value="0"/>
 		</Style>
 	</UserControl.Styles>
+	
+	<dialog:DialogHost Identifier="MainDialogHost" Background="{actipro:ThemeResource Container2BackgroundBrush}"
+					   DialogMargin="3" dialog:DialogHostStyle.CornerRadius="4" DisableOpeningAnimation="True">
+		<Border Background="{actipro:ThemeResource Container1BackgroundBrush}"
+				BorderBrush="{actipro:ThemeResource Container1BorderBrush}"
+				Padding="{actipro:ScaledThickness 2}">
+			<TabControl>
+				<TabItem Header="Live Event">
+					<Grid ColumnDefinitions="*,*">
+						<Border BorderThickness="1" Background="{actipro:ThemeResource Container2BackgroundBrush}"
+								BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+								CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 1}">
+							<StackPanel>
+								<TextBlock Classes="theme-text-heading" Text="Connections"/>
 
-	<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*">
+								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="1"
+										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+									<v:OrganizationView DataContext="{Binding Organization}" Grid.Row="2"></v:OrganizationView>
+								</Border>
+								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
+										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+									<TextBlock Classes="theme-text-heading size-sm" Text="Orbits"/>
+								</Border>
+								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
+										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+									<TextBlock Classes="theme-text-heading size-sm" Text="X2 Server"/>
+								</Border>
+								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
+										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+									<TextBlock Classes="theme-text-heading size-sm" Text="Control Log"/>
+								</Border>
+							</StackPanel>
+						</Border>
+
+						<Border BorderThickness="1" Background="{actipro:ThemeResource Container2BackgroundBrush}" Grid.Column="1" Margin="1,0,0,0"
+								BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+								CornerRadius="{actipro:ScaledCornerRadius 1.5}"
+								Padding="{actipro:ScaledThickness 1}">
+							<Grid RowDefinitions="Auto,*">
+								<TextBlock Classes="theme-text-heading" Text="Event Settings"/>
+							</Grid>
+						</Border>
+					</Grid>
+				</TabItem>
+
+				<!--Logs-->
+				<TabItem Header="Logs">
+					<Grid RowDefinitions="Auto,*">
+						<TextBlock Text="Logs" Classes="theme-text-heading size-sm" Margin="12,0,3,3"/>
+						<lc:LogViewerControl DataContext="{Binding LogViewer}" Grid.Row="1"/>
+					</Grid>
+				</TabItem>
+			</TabControl>
+		</Border>
+	</dialog:DialogHost>
+	<!--<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*">
 		<TextBlock Text="RMonitor Orbits Scoreboard Endpoint" Classes="theme-text-heading size-sm" Margin="12,3,3,3" Grid.Row="0"/>
 		<Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto" Grid.Row="1" Margin="18,2">
 			<TextBlock Text="IP:" VerticalAlignment="Center"/>
@@ -54,7 +115,6 @@
 			<Button Content="open" Margin="3,0,0,0" Command="{Binding OpenLogs}" Classes="hyperlink"/>
 		</StackPanel>
 		
-		<TextBlock Text="Logs" Classes="theme-text-heading size-sm" Margin="12,8,3,3" Grid.Row="5"/>
-		<lc:LogViewerControl DataContext="{Binding LogViewer}" Grid.Row="6" Height="300"/>
-	</Grid>
+		
+	</Grid>-->
 </UserControl>

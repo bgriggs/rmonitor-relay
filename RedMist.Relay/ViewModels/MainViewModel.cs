@@ -1,7 +1,9 @@
 ﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LogViewer.Core.ViewModels;
+using Microsoft.Extensions.Logging;
 using RedMist.Relay.Services;
+using RedMist.TimingCommon.Models.Configuration;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -16,32 +18,13 @@ public partial class MainViewModel : ObservableValidator
 {
     private readonly ISettingsProvider settings;
     private readonly Services.Relay relay;
+    private readonly OrganizationClient organizationClient;
+    private readonly EventManagementClient eventManagementClient;
+    private readonly ILoggerFactory loggerFactory;
+
     public LogViewerControlViewModel LogViewer { get; }
 
-    private string ip = string.Empty;
-    [CustomValidation(typeof(MainViewModel), nameof(IpValidate))]
-    public string Ip
-    {
-        get => ip;
-        set => SetProperty(ref ip, value, validate: true);
-    }
-
-    private int port = 50000;
-    [Range(1, 65535)]
-    public int Port
-    {
-        get => port;
-        set => SetProperty(ref port, value, validate: true);
-    }
-
-    private string clientSecret = string.Empty;
-    [StringLength(32, MinimumLength = 5)]
-    public string ClientSecret
-    {
-        get => clientSecret;
-        set => SetProperty(ref clientSecret, value);
-    }
-
+    public OrganizationViewModel Organization { get; }
 
     [ObservableProperty]
     private bool isConnected = false;
@@ -57,11 +40,18 @@ public partial class MainViewModel : ObservableValidator
     private bool? enableLogMessages = true;
 
 
-    public MainViewModel(ISettingsProvider settings, Services.Relay relay, LogViewerControlViewModel logViewer)
+    public MainViewModel(ISettingsProvider settings, Services.Relay relay, LogViewerControlViewModel logViewer, 
+        OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory)
     {
         this.settings = settings;
         this.relay = relay;
         LogViewer = logViewer;
+        this.organizationClient = organizationClient;
+        this.eventManagementClient = eventManagementClient;
+        this.loggerFactory = loggerFactory;
+
+
+        Organization = new OrganizationViewModel(organizationClient, settings, loggerFactory);
 
         relay.ConnectionStatusChanged += async (state) =>
         {
@@ -83,48 +73,48 @@ public partial class MainViewModel : ObservableValidator
 
     public void LoadSettings()
     {
-        Ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
-        Port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var port) ? port : 50000;
-        ClientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
+        //Ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
+        //Port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var port) ? port : 50000;
+        //ClientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
     }
 
-    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-        if (e.PropertyName == nameof(Ip))
-        {
-            settings.SaveUser("RMonitorIP", Ip);
-        }
-        else if (e.PropertyName == nameof(Port))
-        {
-            settings.SaveUser("RMonitorPort", Port.ToString());
-        }
-        else if (e.PropertyName == nameof(ClientSecret))
-        {
-            settings.SaveUser("Keycloak:ClientSecret", ClientSecret);
-        }
-        else if (e.PropertyName == nameof(EnableLogMessages))
-        {
-            relay.SetLocalMessageLogging(EnableLogMessages ?? false);
-        }
-    }
+    //protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    //{
+    //    base.OnPropertyChanged(e);
+    //    if (e.PropertyName == nameof(Ip))
+    //    {
+    //        settings.SaveUser("RMonitorIP", Ip);
+    //    }
+    //    else if (e.PropertyName == nameof(Port))
+    //    {
+    //        settings.SaveUser("RMonitorPort", Port.ToString());
+    //    }
+    //    else if (e.PropertyName == nameof(ClientSecret))
+    //    {
+    //        settings.SaveUser("Keycloak:ClientSecret", ClientSecret);
+    //    }
+    //    else if (e.PropertyName == nameof(EnableLogMessages))
+    //    {
+    //        relay.SetLocalMessageLogging(EnableLogMessages ?? false);
+    //    }
+    //}
 
-    public async Task ConnectAsync()
-    {
-        IsConnectionBusy = true;
-        try
-        {
-            var result = await relay.StartAsync(Ip, Port);
-            if (result)
-            {
-                IsConnected = true;
-            }
-        }
-        finally
-        {
-            IsConnectionBusy = false;
-        }
-    }
+    //public async Task ConnectAsync()
+    //{
+    //    IsConnectionBusy = true;
+    //    try
+    //    {
+    //        var result = await relay.StartAsync(Ip, Port);
+    //        if (result)
+    //        {
+    //            IsConnected = true;
+    //        }
+    //    }
+    //    finally
+    //    {
+    //        IsConnectionBusy = false;
+    //    }
+    //}
 
     public async Task DisconnectAsync()
     {
@@ -140,15 +130,7 @@ public partial class MainViewModel : ObservableValidator
         }
     }
 
-    public static ValidationResult IpValidate(string host, ValidationContext context)
-    {
-        if (IPAddress.TryParse(host, out _))
-        {
-            return ValidationResult.Success!;
-        }
-
-        return new ValidationResult("IP Address is not valid");
-    }
+   
 
     public void OpenLogs()
     {

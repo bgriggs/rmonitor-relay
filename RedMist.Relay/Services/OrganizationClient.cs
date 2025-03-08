@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.Services;
 
-internal class OrganizationClient
+public class OrganizationClient
 {
     private readonly RestClient restClient;
 
