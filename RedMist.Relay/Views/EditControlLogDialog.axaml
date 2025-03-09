@@ -37,7 +37,7 @@
 							<TextBlock Text="ID is found in the URL after the d/" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
 							<TextBlock Text="ex: e12eBnLDWmf4Gu7GTAPcXRQJUKCFXaVDCPEAg3ci1boq0" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
 							<TextBox Text="{Binding WrlGoogleTabName}" Watermark="Worksheet" Margin="1,12,1,1"/>
-							<TextBlock Text="Leave empty for default active tab/worksheet" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+							<TextBlock Text="Leave empty for first active tab/worksheet" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
 						</StackPanel>
 					</DataTemplate>
 				</sel:ControlLogSelector>

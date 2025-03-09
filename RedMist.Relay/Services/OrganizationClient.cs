@@ -1,5 +1,6 @@
 ﻿using BigMission.Shared.Auth;
 using Microsoft.Extensions.Configuration;
+using RedMist.TimingCommon.Models;
 using RedMist.TimingCommon.Models.Configuration;
 using RestSharp;
 using System;
@@ -37,5 +38,12 @@ public class OrganizationClient
         var request = new RestRequest("UpdateOrganization", Method.Post);
         request.AddJsonBody(organization);
         await restClient.PostAsync(request);
+    }
+
+    public async Task<ControlLogStatistics> LoadControlLogStatisticsAsync(Organization organization)
+    {
+        var request = new RestRequest("GetControlLogStatistics", Method.Get);
+        request.AddJsonBody(organization);
+        return await restClient.PostAsync<ControlLogStatistics>(request) ?? new ControlLogStatistics();
     }
 }

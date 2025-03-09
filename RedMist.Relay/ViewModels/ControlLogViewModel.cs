@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DialogHostAvalonia;
 using Microsoft.Extensions.Logging;
@@ -43,16 +44,45 @@ public partial class ControlLogViewModel : ObservableValidator
 
     public void Initialize()
     {
-        checkUpdateControlLogStatisticsSubscription ??= Observable.Interval(TimeSpan.FromSeconds(10)).Subscribe(_ => CheckUpdateControlLogStatistics());
+        checkUpdateControlLogStatisticsSubscription ??= Observable.Interval(TimeSpan.FromSeconds(60)).Subscribe(async _ => { await CheckUpdateControlLogStatistics(); });
     }
 
-    private void CheckUpdateControlLogStatistics()
+    private async Task CheckUpdateControlLogStatistics()
     {
         try
         {
+            var org = configurationService.OrganizationConfiguration;
+            if (org != null && !string.IsNullOrEmpty(org.ControlLogType))
+            {
+                var stat = await organizationClient.LoadControlLogStatisticsAsync(org);
 
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (stat.IsConnected)
+                    {
+                        LogEntries = stat.TotalEntries;
+                        LogConnectionStr = ConnectionState.Connected.ToString();
+                        LogConnectionState = ConnectionState.Connected;
+                    }
+                    else
+                    {
+                        LogEntries = 0;
+                        LogConnectionStr = ConnectionState.Disconnected.ToString();
+                        LogConnectionState = ConnectionState.Disconnected;
+                    }
+                }, DispatcherPriority.Background);
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    LogEntries = 0;
+                    LogConnectionStr = "N/A";
+                    LogConnectionState = ConnectionState.Unknown;
+                }, DispatcherPriority.Background);
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to update control log statistics");
         }
@@ -74,7 +104,7 @@ public partial class ControlLogViewModel : ObservableValidator
                     await configurationService.SaveConfiguration(config);
                     Logger.LogInformation("Control log configuration updated.");
 
-                    CheckUpdateControlLogStatistics();
+                    _ = CheckUpdateControlLogStatistics();
                 }
             }
             else
