@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:RedMist.Relay.Views"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="480"
-		Width="650" Height="500"
+		Width="750" Height="550"
         x:Class="RedMist.Relay.Views.MainWindow"
         Icon="/Assets/redmist.ico"
         Title="Red Mist Relay">

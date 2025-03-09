@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using RedMist.Relay.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace RedMist.Relay.Services;
 /// <summary>
 /// Take data received from RMonitor endpoint and send to the SignalR hub.
 /// </summary>
-public class Relay
+public class Relay : IRecipient<OrganizationConnectionChanged>
 {
     private readonly HubClient hubClient;
     private readonly RMonitorClient rMonitorClient;
@@ -22,7 +23,7 @@ public class Relay
     private int messagesReceived;
     public event Action<(int rx, int tx)>? MessageCountChanged;
     private DateTime lastMessageCountChanged;
-    private HubConnectionState lastState = HubConnectionState.Disconnected;
+    private HubConnectionState lastHubState = HubConnectionState.Disconnected;
     private FileStream? localLoggingStream;
 
     private ILogger Logger { get; }
@@ -33,66 +34,35 @@ public class Relay
         this.hubClient = hubClient;
         this.rMonitorClient = rMonitorClient;
         this.eventDataCache = eventDataCache;
-        rMonitorClient.ReceivedData += async (data) => await ReceiveData(data);
+        rMonitorClient.ReceivedData += async (data) => await RMonitorReceiveData(data);
 
         hubClient.ReceivedSendEventData += async () => await SendCachedMessagesAsync();
-        hubClient.ConnectionStatusChanged += async (state) => await OnConnectionChanged(state);
+        hubClient.ConnectionStatusChanged += async (state) => await OnHubConnectionChanged(state);
 
         eventDataCache.EventChanged += async (e) => await hubClient.SendEventUpdate(e.eventId, e.name);
     }
 
-    public async Task<bool> StartAsync(string rmonitorIp, int rmonitorPort, CancellationToken cancellationToken = default)
+    #region Hub
+
+    public async Task StartHubAsync()
     {
-        await hubClient.StartAsync(cancellationToken);
-        return await rMonitorClient.ConnectAsync(rmonitorIp, rmonitorPort, cancellationToken);
+        await hubClient.StartAsync(CancellationToken.None);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
+    public void Receive(OrganizationConnectionChanged message)
     {
-        await rMonitorClient.DisconnectAsync(cancellationToken);
+        hubClient.ReloadClientCredentials();
     }
 
-    private async Task ReceiveData(string data)
-    {
-        FireMessageCountChanged();
-        try
-        {
-            messagesReceived++;
-            await CheckForInit(data);
-            await eventDataCache.Update(data);
-            await hubClient.SendAsync(eventDataCache.EventNumber, data);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Failed to send data to hub");
-        }
-        FireMessageCountChanged();
-    }
-
-    private void FireMessageCountChanged()
-    {
-        try
-        {
-            if (DateTime.Now - lastMessageCountChanged > TimeSpan.FromSeconds(1))
-            {
-                MessageCountChanged?.Invoke((messagesReceived, hubClient.MessagesSent));
-                lastMessageCountChanged = DateTime.Now;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Failed to fire message count changed event");
-        }
-    }
-
-    private async Task OnConnectionChanged(HubConnectionState state)
+    private async Task OnHubConnectionChanged(HubConnectionState state)
     {
         ConnectionStatusChanged?.Invoke(state);
 
-        if (state != lastState)
+        if (state != lastHubState)
         {
-            lastState = state;
+            lastHubState = state;
             Logger.LogDebug("Hub connection state changed: {0}", state);
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<HubConnectionState>(state));
         }
         else
         {
@@ -126,6 +96,53 @@ public class Relay
         }
     }
 
+    #endregion
+
+    public async Task<bool> StartOrbitsAsync(string rmonitorIp, int rmonitorPort, CancellationToken cancellationToken = default)
+    {
+        return await rMonitorClient.ConnectAsync(rmonitorIp, rmonitorPort, cancellationToken);
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken = default)
+    {
+        await rMonitorClient.DisconnectAsync(cancellationToken);
+    }
+
+    private async Task RMonitorReceiveData(string data)
+    {
+        //FireMessageCountChanged();
+        try
+        {
+            messagesReceived++;
+            await CheckForInit(data);
+            await eventDataCache.Update(data);
+            await hubClient.SendAsync(eventDataCache.EventNumber, data);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send data to hub");
+        }
+        //FireMessageCountChanged();
+    }
+
+    //private void FireMessageCountChanged()
+    //{
+    //    try
+    //    {
+    //        if (DateTime.Now - lastMessageCountChanged > TimeSpan.FromSeconds(1))
+    //        {
+    //            MessageCountChanged?.Invoke((messagesReceived, hubClient.MessagesSent));
+    //            lastMessageCountChanged = DateTime.Now;
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Logger.LogError(ex, "Failed to fire message count changed event");
+    //    }
+    //}
+
+   
+
     /// <summary>
     /// Clear cache on init command.
     /// </summary>
@@ -141,6 +158,8 @@ public class Relay
             }
         }
     }
+
+    #region Logging
 
     public void SetLocalMessageLogging(bool enabled)
     {
@@ -180,4 +199,7 @@ public class Relay
             Logger.LogError(ex, "Failed to log local message");
         }
     }
+
+    #endregion
+
 }

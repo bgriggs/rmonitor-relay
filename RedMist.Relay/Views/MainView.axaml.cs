@@ -17,7 +17,7 @@ public partial class MainView : UserControl
 
         if (DataContext is MainViewModel viewModel)
         {
-            viewModel.LoadSettings();
+            viewModel.Initialize();
         }
     }
 }

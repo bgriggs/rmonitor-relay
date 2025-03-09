@@ -18,7 +18,7 @@
 		<TextBlock Classes="theme-text-heading" Text="Organization Information" Margin="4" HorizontalAlignment="Center"/>
 		<TextBox Text="{Binding ClientId}" Watermark="Client ID" Grid.Row="1" Margin="1"/>
 		<TextBox Text="{Binding ClientSecret}" Watermark="Client Secret" Classes="has-reveal-password-button" PasswordChar="{actipro:ThemeResource EditPasswordChar}" Grid.Row="2" Margin="1"/>
-		<TextBox Text="{Binding ClientId}" Watermark="Organization Website" Grid.Row="3" Margin="1"/>
+		<TextBox Text="{Binding OrgWebsite}" Watermark="Organization Website" Grid.Row="3" Margin="1"/>
 
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
 			<Button Classes="ok" Margin="0,0,3,0" CommandParameter="{Binding .}"

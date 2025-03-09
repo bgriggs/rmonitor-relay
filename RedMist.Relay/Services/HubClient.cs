@@ -1,7 +1,9 @@
 ﻿using BigMission.Shared.SignalR;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RedMist.Relay.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +49,7 @@ public class HubClient : HubClientBase
 
         await hub.SendAsync("SendRMonitor", eventId, data, stoppingToken);
         MessagesSent++;
+        WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         return true;
     }
 
@@ -61,6 +64,7 @@ public class HubClient : HubClientBase
             }
             await hub.SendAsync("SendEventUpdate", eventId, eventName, stoppingToken);
             MessagesSent++;
+            WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         }
         catch (Exception ex)
         {

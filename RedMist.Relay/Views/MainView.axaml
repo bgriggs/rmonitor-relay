@@ -18,23 +18,9 @@
 	</Design.DataContext>
 
 	<UserControl.Styles>
-		<Style Selector="Button.hyperlink">
-			<Setter Property="Template">
-				<ControlTemplate>
-					<TextBlock Text="{TemplateBinding Content}" Foreground="Blue" TextDecorations="Underline">
-						<TextBlock.Styles>
-							<Style Selector="TextBlock:pointerover">
-								<Setter Property="Foreground" Value="Red"/>
-							</Style>
-						</TextBlock.Styles>
-					</TextBlock>
-				</ControlTemplate>
-			</Setter>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="BorderThickness" Value="0"/>
-		</Style>
+		
 	</UserControl.Styles>
-	
+
 	<dialog:DialogHost Identifier="MainDialogHost" Background="{actipro:ThemeResource Container2BackgroundBrush}"
 					   DialogMargin="3" dialog:DialogHostStyle.CornerRadius="4" DisableOpeningAnimation="True">
 		<Border Background="{actipro:ThemeResource Container1BackgroundBrush}"
@@ -85,9 +71,24 @@
 
 				<!--Logs-->
 				<TabItem Header="Logs">
-					<Grid RowDefinitions="Auto,*">
-						<TextBlock Text="Logs" Classes="theme-text-heading size-sm" Margin="12,0,3,3"/>
-						<lc:LogViewerControl DataContext="{Binding LogViewer}" Grid.Row="1"/>
+					<Grid RowDefinitions="Auto,Auto,*">
+						<Border BorderThickness="1" Background="{actipro:ThemeResource Container2BackgroundBrush}" Grid.Row="0" Margin="1,0,0,0"
+								BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+								CornerRadius="{actipro:ScaledCornerRadius 1.5}"
+								Padding="{actipro:ScaledThickness 1}">
+							<StackPanel>
+								<TextBlock Text="RMonitor Logging" Classes="theme-text-heading size-sm" Margin="10,0,3,3"/>
+								<StackPanel Orientation="Horizontal">
+									<CheckBox Content="Log Received Messages" IsChecked="{Binding EnableLogMessages}" Margin="10,0,0,0"/>
+									<Button Content="open" Margin="3,0,0,0" Command="{Binding OpenLogs}" Classes="theme-link accent">
+										<TextBlock Text="Open Logs Folder" TextDecorations="Underline" />
+									</Button>
+								</StackPanel>
+							</StackPanel>
+						</Border>
+
+						<TextBlock Text="Logs" Classes="theme-text-heading size-sm" Margin="12,0,3,3" Grid.Row="1"/>
+						<lc:LogViewerControl DataContext="{Binding LogViewer}" Grid.Row="2"/>
 					</Grid>
 				</TabItem>
 			</TabControl>

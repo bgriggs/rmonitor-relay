@@ -13,7 +13,7 @@ public class OrganizationClient
 
     public OrganizationClient(IConfiguration configuration)
     {
-        var url = configuration["Server:Url"] ?? throw new InvalidOperationException("Server URL is not configured.");
+        var url = configuration["Server:OrganizationUrl"] ?? throw new InvalidOperationException("Server URL is not configured.");
         var authUrl = configuration["Keycloak:AuthServerUrl"] ?? throw new InvalidOperationException("Keycloak URL is not configured.");
         var realm = configuration["Keycloak:Realm"] ?? throw new InvalidOperationException("Keycloak realm is not configured.");
         var clientId = configuration["Keycloak:ClientId"] ?? throw new InvalidOperationException("Keycloak client ID is not configured.");
