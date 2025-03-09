@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using RedMist.Relay.Models;
 using System;
 using System.IO;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,13 +22,14 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
     private readonly RMonitorClient rMonitorClient;
     private readonly EventDataCache eventDataCache;
     public event Action<HubConnectionState>? ConnectionStatusChanged;
-    private int messagesReceived;
-    public event Action<(int rx, int tx)>? MessageCountChanged;
-    private DateTime lastMessageCountChanged;
+    private int rmonitorMessagesReceived;
+    private bool lastRmonitorConnected;
     private HubConnectionState lastHubState = HubConnectionState.Disconnected;
     private FileStream? localLoggingStream;
 
     private ILogger Logger { get; }
+    private IDisposable? consistencyCheckInterval;
+
 
     public Relay(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient, EventDataCache eventDataCache)
     {
@@ -98,8 +101,14 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
 
     #endregion
 
+    #region Orbits Result Monitor
+
     public async Task<bool> StartOrbitsAsync(string rmonitorIp, int rmonitorPort, CancellationToken cancellationToken = default)
     {
+        if (consistencyCheckInterval == null)
+        {
+            consistencyCheckInterval = Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(_ => CheckOrbitsConnection());
+        }
         return await rMonitorClient.ConnectAsync(rmonitorIp, rmonitorPort, cancellationToken);
     }
 
@@ -110,38 +119,19 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
 
     private async Task RMonitorReceiveData(string data)
     {
-        //FireMessageCountChanged();
         try
         {
-            messagesReceived++;
+            rmonitorMessagesReceived++;
             await CheckForInit(data);
             await eventDataCache.Update(data);
             await hubClient.SendAsync(eventDataCache.EventNumber, data);
+            WeakReferenceMessenger.Default.Send(new RMonitorMessageStatistic(rmonitorMessagesReceived));
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to send data to hub");
         }
-        //FireMessageCountChanged();
     }
-
-    //private void FireMessageCountChanged()
-    //{
-    //    try
-    //    {
-    //        if (DateTime.Now - lastMessageCountChanged > TimeSpan.FromSeconds(1))
-    //        {
-    //            MessageCountChanged?.Invoke((messagesReceived, hubClient.MessagesSent));
-    //            lastMessageCountChanged = DateTime.Now;
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Logger.LogError(ex, "Failed to fire message count changed event");
-    //    }
-    //}
-
-   
 
     /// <summary>
     /// Clear cache on init command.
@@ -158,6 +148,21 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
             }
         }
     }
+
+    private void CheckOrbitsConnection()
+    {
+        var isConnected = rMonitorClient.IsConnected;
+        if (isConnected != lastRmonitorConnected)
+        {
+            lastRmonitorConnected = isConnected;
+            Logger.LogDebug("RMonitor connection state changed: {0}", lastRmonitorConnected);
+
+            var cs = lastRmonitorConnected ? ConnectionState.Connected : ConnectionState.Disconnected;
+            WeakReferenceMessenger.Default.Send(new OrbitsConnectionState(cs));
+        }
+    }
+
+    #endregion
 
     #region Logging
 
@@ -201,5 +206,4 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
     }
 
     #endregion
-
 }

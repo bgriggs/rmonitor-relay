@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -16,6 +15,7 @@ public class RMonitorClient
     private Socket? _client;
     private ILogger Logger { get; }
     public event Action<string>? ReceivedData;
+    public bool IsConnected => _client != null && _client.Connected;
 
     public RMonitorClient(ILoggerFactory loggerFactory)
     {

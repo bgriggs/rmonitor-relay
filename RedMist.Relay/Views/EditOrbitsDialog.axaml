@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
+             x:Class="RedMist.Relay.Views.EditOrbitsDialog"
+			 x:DataType="vm:EditOrbitsDialogViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignEditOrbitsDialogViewModel />
+	</Design.DataContext>
+	
+
+	Welcome to Avalonia!
+</UserControl>

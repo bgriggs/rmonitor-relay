@@ -9,7 +9,8 @@ class DesignConfiguration : IConfiguration
 {
     private readonly Dictionary<string, string?> config = new()
     {
-        { "Server:Url", "https://localhost:5001" },
+        { "Server:OrganizationUrl", "https://localhost:5001" },
+        { "Server:EventUrl", "https://localhost:5001" },
         { "Hub:Url", "https://localhost:5001/hub" },
         { "Keycloak:AuthServerUrl", "https://localhost:5001/auth" },
         { "Keycloak:Realm", "test" },

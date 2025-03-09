@@ -1,39 +1,56 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using BigMission.Shared.Utilities;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using RedMist.Relay.Models;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class OrbitsViewModel : ObservableValidator
+public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorMessageStatistic>, IRecipient<OrbitsConnectionState>
 {
-    private string ip = string.Empty;
-    [CustomValidation(typeof(MainViewModel), nameof(IpValidate))]
-    public string Ip
+    [ObservableProperty]
+    private int rmonitorMessagesReceived;
+
+    [ObservableProperty]
+    private string rmonitorConnectionStr = "Disconnected";
+
+    [ObservableProperty]
+    private ConnectionState rmonitorConnectionState = ConnectionState.Disconnected;
+
+    private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
+
+
+    public OrbitsViewModel()
     {
-        get => ip;
-        set => SetProperty(ref ip, value, validate: true);
+        WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
-    private int port = 50000;
-    [Range(1, 65535)]
-    public int Port
+
+    public void EditOrbits()
     {
-        get => port;
-        set => SetProperty(ref port, value, validate: true);
+
     }
 
-    public static ValidationResult IpValidate(string host, ValidationContext context)
+    public void Receive(RMonitorMessageStatistic message)
     {
-        if (IPAddress.TryParse(host, out _))
+        _ = debouncer.ExecuteAsync(() =>
         {
-            return ValidationResult.Success!;
-        }
+            Dispatcher.UIThread.Post(() =>
+            {
+                RmonitorMessagesReceived = message.Value;
+            }, DispatcherPriority.Background);
+            return Task.CompletedTask;
+        });
+    }
 
-        return new ValidationResult("IP Address is not valid");
+    public void Receive(OrbitsConnectionState message)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            RmonitorConnectionStr = message.Value.ToString();
+            RmonitorConnectionState = message.Value;
+        }, DispatcherPriority.Background);
     }
 }

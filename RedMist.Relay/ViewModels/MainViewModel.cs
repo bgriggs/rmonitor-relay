@@ -21,6 +21,7 @@ public partial class MainViewModel : ObservableValidator
     public LogViewerControlViewModel LogViewer { get; }
 
     public OrganizationViewModel Organization { get; }
+    public OrbitsViewModel Orbits { get; }
 
 
     [ObservableProperty]
@@ -38,6 +39,7 @@ public partial class MainViewModel : ObservableValidator
         this.loggerFactory = loggerFactory;
 
         Organization = new OrganizationViewModel(organizationClient, settings, loggerFactory);
+        Orbits = new OrbitsViewModel();
 
         relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }
@@ -47,9 +49,10 @@ public partial class MainViewModel : ObservableValidator
     {
         _= Organization.Initialize();
         _ = relay.StartHubAsync();
-        //Ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
-        //Port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var port) ? port : 50000;
-        //ClientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
+
+        var ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
+        var port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var p) ? p : 50000;
+        _ = relay.StartOrbitsAsync(ip, port);
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
