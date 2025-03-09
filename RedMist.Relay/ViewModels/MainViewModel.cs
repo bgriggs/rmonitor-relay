@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LogViewer.Core.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RedMist.Relay.Services;
 using System;
@@ -13,7 +14,7 @@ namespace RedMist.Relay.ViewModels;
 public partial class MainViewModel : ObservableValidator
 {
     private readonly ISettingsProvider settings;
-    private readonly Services.Relay relay;
+    private readonly Services.RelayService relay;
     private readonly OrganizationClient organizationClient;
     private readonly EventManagementClient eventManagementClient;
     private readonly ILoggerFactory loggerFactory;
@@ -22,14 +23,14 @@ public partial class MainViewModel : ObservableValidator
 
     public OrganizationViewModel Organization { get; }
     public OrbitsViewModel Orbits { get; }
-
+    public X2ServerViewModel X2Server { get; }
 
     [ObservableProperty]
     private bool? enableLogMessages = true;
 
 
-    public MainViewModel(ISettingsProvider settings, Services.Relay relay, LogViewerControlViewModel logViewer,
-        OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory)
+    public MainViewModel(ISettingsProvider settings, Services.RelayService relay, LogViewerControlViewModel logViewer, IConfiguration configuration,
+        OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory, OrganizationConfigurationService configurationService)
     {
         this.settings = settings;
         this.relay = relay;
@@ -38,23 +39,19 @@ public partial class MainViewModel : ObservableValidator
         this.eventManagementClient = eventManagementClient;
         this.loggerFactory = loggerFactory;
 
-        Organization = new OrganizationViewModel(organizationClient, settings, loggerFactory);
-        Orbits = new OrbitsViewModel(organizationClient, loggerFactory);
+        Organization = new OrganizationViewModel(configurationService, settings, loggerFactory);
+        Orbits = new OrbitsViewModel(loggerFactory, configurationService);
+        X2Server = new X2ServerViewModel(configurationService, loggerFactory, configuration);
 
         relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }
 
 
-    public async Task Initialize()
+    public void Initialize()
     {
         _ = relay.StartHubAsync();
-        var org = await Organization.Initialize();
-        if (org != null && org.Orbits != null)
-        {
-            _ = relay.StartOrbitsAsync(org.Orbits.IP, org.Orbits.Port);
-        }
-
-        _ = Orbits.Initialize(org);
+        Organization.Initialize();
+        Orbits.Initialize();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -65,40 +62,6 @@ public partial class MainViewModel : ObservableValidator
             relay.SetLocalMessageLogging(EnableLogMessages ?? false);
         }
     }
-
-    //public async Task ConnectAsync()
-    //{
-    //    IsConnectionBusy = true;
-    //    try
-    //    {
-    //        var result = await relay.StartAsync(Ip, Port);
-    //        if (result)
-    //        {
-    //            IsConnected = true;
-    //        }
-    //    }
-    //    finally
-    //    {
-    //        IsConnectionBusy = false;
-    //    }
-    //}
-
-    //public async Task DisconnectAsync()
-    //{
-    //    IsConnectionBusy = true;
-    //    try
-    //    {
-    //        await relay.StopAsync();
-    //    }
-    //    finally
-    //    {
-    //        IsConnected = false;
-    //        IsConnectionBusy = false;
-    //    }
-    //}
-
-
-
     public void OpenLogs()
     {
         var path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);

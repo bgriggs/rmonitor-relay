@@ -15,7 +15,7 @@ namespace RedMist.Relay.Services;
 /// <summary>
 /// Take data received from RMonitor endpoint and send to the SignalR hub.
 /// </summary>
-public class Relay : IRecipient<OrganizationConnectionChanged>
+public class RelayService : IRecipient<OrganizationConfigurationChanged>
 {
     private readonly HubClient hubClient;
     private readonly RMonitorClient rMonitorClient;
@@ -24,13 +24,14 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
     private int rmonitorMessagesReceived;
     private bool lastRmonitorConnected;
     private HubConnectionState lastHubState = HubConnectionState.Disconnected;
+    public HubConnectionState HubConnectionState => lastHubState;
     private FileStream? localLoggingStream;
 
     private ILogger Logger { get; }
-    private IDisposable? consistencyCheckInterval;
+    private IDisposable? orbitsConnectionCheckSubscription;
 
 
-    public Relay(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient, EventDataCache eventDataCache)
+    public RelayService(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient, EventDataCache eventDataCache)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         this.hubClient = hubClient;
@@ -45,6 +46,7 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
+
 
     #region Hub
 
@@ -101,10 +103,7 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
 
     public async Task<bool> StartOrbitsAsync(string rmonitorIp, int rmonitorPort, CancellationToken cancellationToken = default)
     {
-        if (consistencyCheckInterval == null)
-        {
-            consistencyCheckInterval = Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(_ => CheckOrbitsConnection());
-        }
+        orbitsConnectionCheckSubscription ??= Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(_ => CheckFireOrbitsConnectionChanged());
         return await rMonitorClient.ConnectAsync(rmonitorIp, rmonitorPort, cancellationToken);
     }
 
@@ -113,6 +112,10 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
         await rMonitorClient.DisconnectAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Aggregate result monitor data locally and to the cloud.
+    /// </summary>
+    /// <param name="data">rmonitor raw data</param>
     private async Task RMonitorReceiveData(string data)
     {
         try
@@ -145,7 +148,10 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
         }
     }
 
-    private void CheckOrbitsConnection()
+    /// <summary>
+    /// Manually determines when connection has changed on the Orbits connection.
+    /// </summary>
+    private void CheckFireOrbitsConnectionChanged()
     {
         var isConnected = rMonitorClient.IsConnected;
         if (isConnected != lastRmonitorConnected)
@@ -160,19 +166,24 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
 
     #endregion
 
-    public void Receive(OrganizationConnectionChanged message)
+    public void Receive(OrganizationConfigurationChanged message)
     {
         hubClient.ReloadClientCredentials();
 
-        if (message.Organization.Orbits != null)
+        if (message.Organization?.Orbits != null)
         {
-            _=Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 await rMonitorClient.DisconnectAsync(CancellationToken.None);
                 await Task.Delay(3000); // Allow reconnect loops to time out
-                await rMonitorClient.ConnectAsync(message.Organization.Orbits.IP, message.Organization.Orbits.Port, CancellationToken.None);
+                await StartOrbitsAsync(message.Organization.Orbits.IP, message.Organization.Orbits.Port, CancellationToken.None);
                 Logger.LogInformation("Orbits connection changed: {0}", message.Organization.Orbits.IP);
             });
+        }
+
+        if (message.Organization?.X2 != null)
+        {
+            // Start X2 connection
         }
     }
 

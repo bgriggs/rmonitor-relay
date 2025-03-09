@@ -7,54 +7,42 @@ using MsBox.Avalonia.Models;
 using RedMist.TimingCommon.Models.Configuration;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public class EditOrbitsDialogViewModel : ObservableValidator
+public partial class EditX2ServerDialogViewModel : ObservableValidator
 {
-    public OrbitsConfiguration Configuration { get; }
+    public X2Configuration Configuration { get; }
 
-    [CustomValidation(typeof(EditOrbitsDialogViewModel), nameof(IpValidate))]
-    public string Ip
+    [StringLength(128)]
+    public string Server
     {
-        get => Configuration.IP;
-        set => SetProperty(Configuration.IP, value, Configuration, (u, n) => u.IP = n, validate: true);
+        get => Configuration.Server ?? string.Empty;
+        set => SetProperty(Configuration.Server, value, Configuration, (u, n) => u.Server = n, validate: true);
     }
 
-    [Range(1, 65535)]
-    public int Port
+    [StringLength(128)]
+    public string Username
     {
-        get => Configuration.Port;
-        set => SetProperty(Configuration.Port, value, Configuration, (u, n) => u.Port = n, validate: true);
+        get => Configuration.Username ?? string.Empty;
+        set => SetProperty(Configuration.Username, value, Configuration, (u, n) => u.Username = n, validate: true);
     }
 
-    [StringLength(2048)]
-    public string LogsPath
+    [StringLength(30)]
+    public string Password
     {
-        get => Configuration.LogsPath ?? string.Empty;
-        set => SetProperty(Configuration.LogsPath, value, Configuration, (u, n) => u.LogsPath = n, validate: true);
+        get => Configuration.Password ?? string.Empty;
+        set => SetProperty(Configuration.Password, value, Configuration, (u, n) => u.Password = n, validate: true);
     }
 
 
-    public EditOrbitsDialogViewModel(OrbitsConfiguration configuration)
+    public EditX2ServerDialogViewModel(X2Configuration configuration)
     {
         Configuration = configuration;
     }
 
-
-    public static ValidationResult IpValidate(string host, ValidationContext context)
-    {
-        if (IPAddress.TryParse(host, out _))
-        {
-            return ValidationResult.Success!;
-        }
-
-        return new ValidationResult("IP Address is not valid");
-    }
 
     public async Task Save()
     {

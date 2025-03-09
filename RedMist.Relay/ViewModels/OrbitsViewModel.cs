@@ -2,7 +2,6 @@
 using BigMission.Shared.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging.Messages;
 using DialogHostAvalonia;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -18,7 +17,8 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorMessageStatistic>, IRecipient<OrbitsConnectionState>
+public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorMessageStatistic>, 
+    IRecipient<OrbitsConnectionState>, IRecipient<OrganizationConfigurationChanged>
 {
     private ILogger Logger { get; }
 
@@ -32,25 +32,24 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
     private ConnectionState rmonitorConnectionState = ConnectionState.Disconnected;
 
     private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
-    private readonly OrganizationClient organizationClient;
-
+    private readonly OrganizationConfigurationService configurationService;
     [ObservableProperty]
     private ConnectionState orbitsLogsConnectionState = ConnectionState.Disconnected;
 
 
-    public OrbitsViewModel(OrganizationClient organizationClient, ILoggerFactory loggerFactory)
+    public OrbitsViewModel(ILoggerFactory loggerFactory, OrganizationConfigurationService configurationService)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         WeakReferenceMessenger.Default.RegisterAll(this);
-        this.organizationClient = organizationClient;
+        this.configurationService = configurationService;
     }
 
 
-    public async Task Initialize(Organization? organization)
+    public void Initialize(Organization? organization = null)
     {
         try
         {
-            organization ??= await organizationClient.LoadOrganizationAsync();
+            organization ??= configurationService.OrganizationConfiguration;
 
             if (organization != null && organization.Orbits != null && !string.IsNullOrEmpty(organization.Orbits.LogsPath))
             {
@@ -67,7 +66,7 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
     {
         try
         {
-            var organization = await organizationClient.LoadOrganizationAsync();
+            var organization = configurationService.OrganizationConfiguration;
             if (organization != null)
             {
                 var orbitsConfig = organization.Orbits ?? new OrbitsConfiguration
@@ -82,11 +81,10 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
                 if (result is OrbitsConfiguration config)
                 {
                     organization.Orbits = config;
-                    await organizationClient.SaveOrganizationAsync(organization);
+                    await configurationService.SaveConfiguration(organization);
                     Logger.LogInformation("Orbits configuration updated.");
 
                     UpdateOrbitsLogsExist(config.LogsPath ?? string.Empty);
-                    WeakReferenceMessenger.Default.Send(new OrganizationConnectionChanged(organization));
                 }
             }
             else
@@ -128,6 +126,11 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
             RmonitorConnectionStr = message.Value.ToString();
             RmonitorConnectionState = message.Value;
         }, DispatcherPriority.Background);
+    }
+
+    public void Receive(OrganizationConfigurationChanged message)
+    {
+        Initialize(message.Organization);
     }
 
     public void UpdateOrbitsLogsExist(string path)

@@ -20,10 +20,9 @@ namespace RedMist.Relay.ViewModels;
 
 public partial class OrganizationViewModel : ObservableValidator, IRecipient<HubMessageStatistic>, IRecipient<ValueChangedMessage<HubConnectionState>>
 {
-    private readonly OrganizationClient organizationClient;
+    private readonly OrganizationConfigurationService configurationService;
     private readonly ISettingsProvider settings;
     private ILogger Logger { get; }
-    private Organization? organization;
 
     [ObservableProperty]
     private string orgName = string.Empty;
@@ -40,15 +39,16 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
     private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
 
 
-    public OrganizationViewModel(OrganizationClient organizationClient, ISettingsProvider settings, ILoggerFactory loggerFactory)
+    public OrganizationViewModel(OrganizationConfigurationService configurationService, ISettingsProvider settings, ILoggerFactory loggerFactory)
     {
-        this.organizationClient = organizationClient;
+        this.configurationService = configurationService;
         this.settings = settings;
         Logger = loggerFactory.CreateLogger(GetType().Name);
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
-    public async Task<Organization?> Initialize()
+
+    public void Initialize()
     {
         var clientId = settings.GetWithOverride("Keycloak:ClientId") ?? string.Empty;
         var clientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
@@ -56,21 +56,19 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
         {
             Logger.LogWarning("Missing client ID and/or secret to connect to cloud.");
-            return null;
         }
 
-        organization = await organizationClient.LoadOrganizationAsync();
+        var organization = configurationService.OrganizationConfiguration;
         if (organization != null)
         {
             OrgName = organization.Name;
         }
-
-        return organization;
     }
 
     public async Task EditOrganization()
     {
         EditOrganizationDialogViewModel vm;
+        var organization = configurationService.OrganizationConfiguration;
         if (organization != null)
         {
             vm = new EditOrganizationDialogViewModel(organization, settings);
@@ -100,7 +98,7 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
 
             try
             {
-                await organizationClient.SaveOrganizationAsync(dvm.Organization);
+                await configurationService.SaveConfiguration(dvm.Organization);
             }
             catch (Exception ex)
             {

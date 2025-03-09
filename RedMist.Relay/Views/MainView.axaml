@@ -48,7 +48,7 @@
 								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
 										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
 										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
-									<TextBlock Classes="theme-text-heading size-sm" Text="X2 Server"/>
+									<v:X2ServerView DataContext="{Binding X2Server}"/>
 								</Border>
 								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
 										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"

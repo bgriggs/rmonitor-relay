@@ -6,7 +6,7 @@
 			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
 			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
 			 xmlns:c="clr-namespace:RedMist.Relay.Controls"
-             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="250"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
              x:Class="RedMist.Relay.Views.OrbitsView"
 			 x:DataType="vm:OrbitsViewModel">
 	<Design.DataContext>
@@ -25,7 +25,7 @@
 		</Grid>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Text="{Binding RmonitorConnectionStr, StringFormat='Status: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="6,0,0,0"/>
-			<TextBlock Text="{Binding RmonitorMessagesReceived, StringFormat='Messages Sent: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
+			<TextBlock Text="{Binding RmonitorMessagesReceived, StringFormat='Messages Received: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
 			<TextBlock Text="Logs" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
 			<c:ConnectionIndicator Connection="{Binding OrbitsLogsConnectionState}" Grid.Column="1" Margin="3,0,0,0" Height="11" Width="11" VerticalAlignment="Center"/>
 		</StackPanel>

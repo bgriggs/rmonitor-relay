@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+			 xmlns:c="clr-namespace:RedMist.Relay.Controls"
+             mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="150"
+             x:Class="RedMist.Relay.Views.X2ServerView"
+			 x:DataType="vm:X2ServerViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignX2ServerViewModel />
+	</Design.DataContext>
+	<StackPanel>
+		<Grid ColumnDefinitions="Auto,Auto,*,Auto">
+			<TextBlock Classes="theme-text-heading size-sm" Text="X2 Server"/>
+			<c:ConnectionIndicator Connection="{Binding X2ConnectionState}" Grid.Column="1" Margin="3,0,0,0" Height="16" Width="16"/>
+			<Button Classes="icon" Command="{Binding EditX2}" Grid.Column="3" Margin="3,0,3,0">
+				<Image Source="{StaticResource editicon}" Width="20" Height="16" Margin="0,0,0,0"/>
+			</Button>
+		</Grid>
+		<StackPanel Orientation="Horizontal">
+			<TextBlock Text="{Binding X2ConnectionStr, StringFormat='Status: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="6,0,0,0"/>
+			<TextBlock Text="{Binding X2MessagesReceived, StringFormat='Messages Received: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

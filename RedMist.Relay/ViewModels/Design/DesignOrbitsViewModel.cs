@@ -2,7 +2,7 @@
 
 public class DesignOrbitsViewModel : OrbitsViewModel
 {
-    public DesignOrbitsViewModel() : base(new DesignOrganizationClient(), new DebugLoggerFactory())
+    public DesignOrbitsViewModel() : base(new DebugLoggerFactory(), new DesignOrganizationConfigurationService())
     {
     }
 }

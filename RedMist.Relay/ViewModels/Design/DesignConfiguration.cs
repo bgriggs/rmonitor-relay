@@ -15,8 +15,9 @@ class DesignConfiguration : IConfiguration
         { "Keycloak:AuthServerUrl", "https://localhost:5001/auth" },
         { "Keycloak:Realm", "test" },
         { "Keycloak:ClientId", "1" },
-        { "Keycloak:ClientSecret", "secret" }
-    };
+        { "Keycloak:ClientSecret", "secret" },
+        { "AesKey", "11111111111111111111111111111111" }
+    };               
 
     public string? this[string key] { get => config[key]; set => throw new NotImplementedException(); }
 
