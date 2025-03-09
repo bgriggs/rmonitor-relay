@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using RedMist.Relay.Models;
@@ -43,6 +42,8 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
         hubClient.ConnectionStatusChanged += async (state) => await OnHubConnectionChanged(state);
 
         eventDataCache.EventChanged += async (e) => await hubClient.SendEventUpdate(e.eventId, e.name);
+
+        WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
     #region Hub
@@ -50,11 +51,6 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
     public async Task StartHubAsync()
     {
         await hubClient.StartAsync(CancellationToken.None);
-    }
-
-    public void Receive(OrganizationConnectionChanged message)
-    {
-        hubClient.ReloadClientCredentials();
     }
 
     private async Task OnHubConnectionChanged(HubConnectionState state)
@@ -163,6 +159,22 @@ public class Relay : IRecipient<OrganizationConnectionChanged>
     }
 
     #endregion
+
+    public void Receive(OrganizationConnectionChanged message)
+    {
+        hubClient.ReloadClientCredentials();
+
+        if (message.Organization.Orbits != null)
+        {
+            _=Task.Run(async () =>
+            {
+                await rMonitorClient.DisconnectAsync(CancellationToken.None);
+                await Task.Delay(3000); // Allow reconnect loops to time out
+                await rMonitorClient.ConnectAsync(message.Organization.Orbits.IP, message.Organization.Orbits.Port, CancellationToken.None);
+                Logger.LogInformation("Orbits connection changed: {0}", message.Organization.Orbits.IP);
+            });
+        }
+    }
 
     #region Logging
 

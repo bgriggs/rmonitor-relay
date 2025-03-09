@@ -11,13 +11,13 @@ public partial class MainView : UserControl
         InitializeComponent();
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
 
         if (DataContext is MainViewModel viewModel)
         {
-            viewModel.Initialize();
+            await viewModel.Initialize();
         }
     }
 }

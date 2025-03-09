@@ -25,7 +25,9 @@
 		</Grid>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Text="{Binding RmonitorConnectionStr, StringFormat='Status: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="6,0,0,0"/>
-			<TextBlock Text="{Binding RmonitorMessagesReceived, StringFormat='Messages Sent: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="16,0,0,0"/>
+			<TextBlock Text="{Binding RmonitorMessagesReceived, StringFormat='Messages Sent: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
+			<TextBlock Text="Logs" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="10,0,0,0"/>
+			<c:ConnectionIndicator Connection="{Binding OrbitsLogsConnectionState}" Grid.Column="1" Margin="3,0,0,0" Height="11" Width="11" VerticalAlignment="Center"/>
 		</StackPanel>
 	</StackPanel>
 </UserControl>

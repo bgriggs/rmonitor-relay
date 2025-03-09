@@ -1,5 +1,8 @@
-﻿namespace RedMist.Relay.Models;
+﻿using RedMist.TimingCommon.Models.Configuration;
 
-public class OrganizationConnectionChanged 
+namespace RedMist.Relay.Models;
+
+public class OrganizationConnectionChanged(Organization organization)
 {
+    public Organization Organization { get; } = organization;
 }

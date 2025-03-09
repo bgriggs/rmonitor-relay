@@ -48,7 +48,7 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
-    public async Task Initialize()
+    public async Task<Organization?> Initialize()
     {
         var clientId = settings.GetWithOverride("Keycloak:ClientId") ?? string.Empty;
         var clientSecret = settings.GetWithOverride("Keycloak:ClientSecret") ?? string.Empty;
@@ -56,7 +56,7 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
         {
             Logger.LogWarning("Missing client ID and/or secret to connect to cloud.");
-            return;
+            return null;
         }
 
         organization = await organizationClient.LoadOrganizationAsync();
@@ -64,8 +64,9 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         {
             OrgName = organization.Name;
         }
-    }
 
+        return organization;
+    }
 
     public async Task EditOrganization()
     {

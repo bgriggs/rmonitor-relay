@@ -39,20 +39,22 @@ public partial class MainViewModel : ObservableValidator
         this.loggerFactory = loggerFactory;
 
         Organization = new OrganizationViewModel(organizationClient, settings, loggerFactory);
-        Orbits = new OrbitsViewModel();
+        Orbits = new OrbitsViewModel(organizationClient, loggerFactory);
 
         relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }
 
 
-    public void Initialize()
+    public async Task Initialize()
     {
-        _= Organization.Initialize();
         _ = relay.StartHubAsync();
+        var org = await Organization.Initialize();
+        if (org != null && org.Orbits != null)
+        {
+            _ = relay.StartOrbitsAsync(org.Orbits.IP, org.Orbits.Port);
+        }
 
-        var ip = settings.GetWithOverride("RMonitorIP") ?? "127.0.0.1";
-        var port = int.TryParse(settings.GetWithOverride("RMonitorPort"), out var p) ? p : 50000;
-        _ = relay.StartOrbitsAsync(ip, port);
+        _ = Orbits.Initialize(org);
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)

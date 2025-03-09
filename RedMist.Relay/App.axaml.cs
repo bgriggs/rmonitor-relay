@@ -87,6 +87,7 @@ public partial class App : Application
 
     [Singleton(typeof(MainView))]
     [Singleton(typeof(EditOrganizationDialog))]
+    [Singleton(typeof(EditOrbitsDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
 
     private void TrayIcon_Clicked(object? sender, System.EventArgs e)

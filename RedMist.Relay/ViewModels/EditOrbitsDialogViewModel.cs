@@ -1,6 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DialogHostAvalonia;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Models;
+using RedMist.TimingCommon.Models.Configuration;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
@@ -11,21 +16,35 @@ namespace RedMist.Relay.ViewModels;
 
 public class EditOrbitsDialogViewModel : ObservableValidator
 {
-    private string ip = string.Empty;
-    [CustomValidation(typeof(MainViewModel), nameof(IpValidate))]
+    public OrbitsConfiguration Configuration { get; }
+
+    [CustomValidation(typeof(EditOrbitsDialogViewModel), nameof(IpValidate))]
     public string Ip
     {
-        get => ip;
-        set => SetProperty(ref ip, value, validate: true);
+        get => Configuration.IP;
+        set => SetProperty(Configuration.IP, value, Configuration, (u, n) => u.IP = n, validate: true);
     }
 
-    private int port = 50000;
     [Range(1, 65535)]
     public int Port
     {
-        get => port;
-        set => SetProperty(ref port, value, validate: true);
+        get => Configuration.Port;
+        set => SetProperty(Configuration.Port, value, Configuration, (u, n) => u.Port = n, validate: true);
     }
+
+    [StringLength(2048)]
+    public string LogsPath
+    {
+        get => Configuration.LogsPath ?? string.Empty;
+        set => SetProperty(Configuration.LogsPath, value, Configuration, (u, n) => u.LogsPath = n, validate: true);
+    }
+
+
+    public EditOrbitsDialogViewModel(OrbitsConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
 
     public static ValidationResult IpValidate(string host, ValidationContext context)
     {
@@ -35,5 +54,35 @@ public class EditOrbitsDialogViewModel : ObservableValidator
         }
 
         return new ValidationResult("IP Address is not valid");
+    }
+
+    public async Task Save()
+    {
+        if (HasErrors)
+        {
+            var errors = GetErrors();
+            var sb = new StringBuilder();
+            foreach (var e in errors)
+            {
+                sb.AppendLine(e.ErrorMessage);
+            }
+
+            var box = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
+            {
+                ButtonDefinitions = [new ButtonDefinition { Name = "OK", IsDefault = true }],
+                ContentTitle = "Validation Errors",
+                ContentMessage = "Please correct the following errors:" + Environment.NewLine + sb.ToString(),
+                Icon = Icon.Error,
+                MaxWidth = 500,
+            });
+            await box.ShowAsync();
+        }
+        else
+        {
+            Configuration.IP = Ip;
+            Configuration.Port = Port;
+            Configuration.LogsPath = LogsPath;
+            DialogHost.Close("MainDialogHost", Configuration);
+        }
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace RedMist.Relay.ViewModels.Design;
+﻿using RedMist.TimingCommon.Models.Configuration;
+
+namespace RedMist.Relay.ViewModels.Design;
 
 public class DesignEditOrbitsDialogViewModel : EditOrbitsDialogViewModel
 {
-    public DesignEditOrbitsDialogViewModel()
+    public DesignEditOrbitsDialogViewModel() : base(new OrbitsConfiguration())
     {
     }
 }
