@@ -16,9 +16,9 @@
 	</Design.DataContext>
 	<StackPanel Margin="3" Width="350">
 		<TextBlock Classes="theme-text-heading" Text="Orbits Configuration" Margin="4" HorizontalAlignment="Center"/>
-		<TextBox Text="{Binding Ip}" Watermark="IP" Grid.Row="1" Margin="1"/>
-		<TextBox Text="{Binding Port}" Watermark="Port" Grid.Row="2" Margin="1"/>
-		<TextBox Text="{Binding LogsPath}" Watermark="Logs Folder" Grid.Row="3" Margin="1"/>
+		<TextBox Text="{Binding Ip}" Watermark="IP" Margin="1"/>
+		<TextBox Text="{Binding Port}" Watermark="Port" Margin="1"/>
+		<TextBox Text="{Binding LogsPath}" Watermark="Logs Folder" Margin="1"/>
 
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
 			<Button Classes="ok" Margin="0,0,3,0" Command="{Binding Save}"/>

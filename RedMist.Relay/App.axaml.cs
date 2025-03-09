@@ -90,6 +90,7 @@ public partial class App : Application
     [Singleton(typeof(EditOrganizationDialog))]
     [Singleton(typeof(EditOrbitsDialog))]
     [Singleton(typeof(EditX2ServerDialog))]
+    [Singleton(typeof(EditControlLogDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
 
     private void TrayIcon_Clicked(object? sender, System.EventArgs e)

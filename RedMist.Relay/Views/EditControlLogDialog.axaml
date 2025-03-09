@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+			 xmlns:sel="clr-namespace:RedMist.Relay.DataTemplateSelectors"
+             mc:Ignorable="d" d:DesignWidth="380" d:DesignHeight="280"
+             x:Class="RedMist.Relay.Views.EditControlLogDialog"
+			 x:DataType="vm:EditControlLogDialogViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignEditControlLogDialogViewModel />
+	</Design.DataContext>
+	<UserControl.Resources>
+	</UserControl.Resources>
+
+	<StackPanel Margin="3" Width="375">
+		<TextBlock Classes="theme-text-heading" Text="Control Log Configuration" Margin="4" HorizontalAlignment="Center"/>
+		<ComboBox ItemsSource="{Binding ControlLogTypes}" SelectedItem="{Binding SelectedControlLogType}" Margin="1">
+			<ComboBox.DataTemplates>
+				<DataTemplate DataType="vm:ControlLogTypeViewModel">
+					<TextBlock Text="{Binding Name}" Classes="theme-text-body" Margin="1"/>
+				</DataTemplate>
+			</ComboBox.DataTemplates>
+		</ComboBox>
+		<ContentControl Content="{Binding SelectedControlLogType}">
+			<ContentControl.DataTemplates>
+				<sel:ControlLogSelector>
+					<!--WrlGoogleSheet-->
+					<DataTemplate x:Key="WrlGoogleSheet" DataType="vm:ControlLogTypeViewModel">
+						<StackPanel>
+							<TextBox Text="{Binding WrlGoogleSheetId}" Watermark="Sheet ID" Margin="1"/>
+							<TextBlock Text="ID is found in the URL after the d/" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+							<TextBlock Text="ex: e12eBnLDWmf4Gu7GTAPcXRQJUKCFXaVDCPEAg3ci1boq0" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+							<TextBox Text="{Binding WrlGoogleTabName}" Watermark="Worksheet" Margin="1,12,1,1"/>
+							<TextBlock Text="Leave empty for default active tab/worksheet" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+						</StackPanel>
+					</DataTemplate>
+				</sel:ControlLogSelector>
+			</ContentControl.DataTemplates>
+		</ContentControl>
+
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
+			<Button Classes="ok" Margin="0,0,3,0" Command="{Binding Save}"/>
+			<Button Classes="close"
+					Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialog:DialogHost}, Path=CloseDialogCommand}"/>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

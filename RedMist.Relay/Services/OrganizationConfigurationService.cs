@@ -85,8 +85,8 @@ public class OrganizationConfigurationService : BackgroundService, IRecipient<Va
     {
         try
         {
-            await organizationClient.SaveOrganizationAsync(organization);
             OrganizationConfiguration = organization;
+            await organizationClient.SaveOrganizationAsync(organization);
         }
         catch (Exception ex)
         {

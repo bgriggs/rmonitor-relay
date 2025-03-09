@@ -16,9 +16,9 @@
 	</Design.DataContext>
 	<StackPanel Margin="3" Width="350">
 		<TextBlock Classes="theme-text-heading" Text="X2 Configuration" Margin="4" HorizontalAlignment="Center"/>
-		<TextBox Text="{Binding Server}" Watermark="Server" Grid.Row="1" Margin="1"/>
-		<TextBox Text="{Binding Username}" Watermark="Username" Grid.Row="2" Margin="1"/>
-		<TextBox Text="{Binding Password}" Watermark="Password" Classes="has-reveal-password-button" PasswordChar="{actipro:ThemeResource EditPasswordChar}" Grid.Row="3" Margin="1"/>
+		<TextBox Text="{Binding Server}" Watermark="Server" Margin="1"/>
+		<TextBox Text="{Binding Username}" Watermark="Username" Margin="1"/>
+		<TextBox Text="{Binding Password}" Watermark="Password" Classes="has-reveal-password-button" PasswordChar="{actipro:ThemeResource EditPasswordChar}" Margin="1"/>
 
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3">
 			<Button Classes="ok" Margin="0,0,3,0" Command="{Binding Save}"/>

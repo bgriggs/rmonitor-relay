@@ -53,7 +53,7 @@
 								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
 										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
 										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
-									<TextBlock Classes="theme-text-heading size-sm" Text="Control Log"/>
+									<v:ControlLogView DataContext="{Binding ControlLog}"/>
 								</Border>
 							</StackPanel>
 						</Border>
