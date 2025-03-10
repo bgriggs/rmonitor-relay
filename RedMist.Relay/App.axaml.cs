@@ -75,10 +75,11 @@ public partial class App : Application
     [Singleton(typeof(WindowsSettingsProvider), typeof(ISettingsProvider))]
     [Singleton(typeof(HubClient))]
     [Singleton(typeof(EventDataCache))]
-    [Singleton(typeof(Services.RelayService))]
+    [Singleton(typeof(RelayService))]
     [Singleton(typeof(RMonitorClient))]
     [Singleton(typeof(OrganizationClient))]
     [Singleton(typeof(EventManagementClient))]
+    [Singleton(typeof(EventService))]
     [Singleton(typeof(OrganizationConfigurationService))]
     internal static partial void ConfigureServices(IServiceCollection services);
 
@@ -91,6 +92,7 @@ public partial class App : Application
     [Singleton(typeof(EditOrbitsDialog))]
     [Singleton(typeof(EditX2ServerDialog))]
     [Singleton(typeof(EditControlLogDialog))]
+    [Singleton(typeof(EditEventDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
 
     private void TrayIcon_Clicked(object? sender, System.EventArgs e)

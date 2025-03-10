@@ -7,6 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
@@ -20,13 +21,15 @@ public partial class MainViewModel : ObservableValidator
     public OrbitsViewModel Orbits { get; }
     public X2ServerViewModel X2Server { get; }
     public ControlLogViewModel ControlLog { get; }
+    public EventViewModel Event { get; }
 
     [ObservableProperty]
     private bool? enableLogMessages = true;
 
 
-    public MainViewModel(ISettingsProvider settings, Services.RelayService relay, LogViewerControlViewModel logViewer, IConfiguration configuration,
-        OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory, OrganizationConfigurationService configurationService)
+    public MainViewModel(ISettingsProvider settings, RelayService relay, LogViewerControlViewModel logViewer, IConfiguration configuration,
+        OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory, 
+        OrganizationConfigurationService configurationService, EventService eventService)
     {
         this.relay = relay;
         LogViewer = logViewer;
@@ -35,6 +38,8 @@ public partial class MainViewModel : ObservableValidator
         Orbits = new OrbitsViewModel(loggerFactory, configurationService);
         X2Server = new X2ServerViewModel(configurationService, loggerFactory, configuration);
         ControlLog = new ControlLogViewModel(loggerFactory, configurationService, organizationClient);
+        Event = new EventViewModel(eventService, loggerFactory);
+
         relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }
 

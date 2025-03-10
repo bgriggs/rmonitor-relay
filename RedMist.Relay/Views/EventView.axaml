@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+			 xmlns:config="clr-namespace:RedMist.TimingCommon.Models.Configuration;assembly=RedMist.TimingCommon"
+			 mc:Ignorable="d" d:DesignWidth="360" d:DesignHeight="300"
+             x:Class="RedMist.Relay.Views.EventView"
+			 x:DataType="vm:EventViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignEventViewModel />
+	</Design.DataContext>
+	<StackPanel>
+		<Grid ColumnDefinitions="*,Auto, Auto">
+			<ComboBox ItemsSource="{Binding EventSummaries}" SelectedItem="{Binding SelectedEvent}" Margin="3">
+				<ComboBox.DataTemplates>
+					<DataTemplate DataType="config:EventSummary">
+						<TextBlock Text="{Binding Name}"/>
+					</DataTemplate>
+				</ComboBox.DataTemplates>
+			</ComboBox>
+			<Button Classes="icon" Command="{Binding EditEvent}" Grid.Column="1" Margin="3,0,0,0" ToolTip.Tip="Edit Event">
+				<Image Source="{StaticResource editicon}" Width="20" Height="16" Margin="0,0,0,0"/>
+			</Button>
+			<Button Classes="icon" Command="{Binding AddEvent}" Grid.Column="2" Margin="0,0,3,0" ToolTip.Tip="Add Event">
+				<Image Source="{StaticResource addicon}" Width="20" Height="16" Margin="0,0,0,0"/>
+			</Button>
+		</Grid>
+		<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Margin="3"
+				BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+			<StackPanel>
+				<TextBlock Classes="theme-text-heading size-xs" Text="General Information"/>
+				<TextBlock Text="{Binding DateRange}" Classes="theme-text-body size-sm"/>
+				<Button Classes="theme-link" HorizontalAlignment="Left" Padding="0" Command="{Binding OpenEventUrl}" Margin="0,1">
+					<TextBlock Text="{Binding EventUrl}" TextDecorations="Underline" Classes="theme-text-body size-sm"/>
+				</Button>
+				<TextBlock Text="{Binding TrackInfo}" Classes="theme-text-body size-sm"/>
+			</StackPanel>
+		</Border>
+		<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Margin="3"
+				BorderBrush="{actipro:ThemeResource Container2BorderBrush}" IsVisible="{Binding IsBroadcast}"
+				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+			<StackPanel>
+				<TextBlock Classes="theme-text-heading size-xs" Text="Broadcast"/>
+				<TextBlock Text="{Binding BroadcastCompanyName}" Classes="theme-text-body size-sm"/>
+				<Button Classes="theme-link" HorizontalAlignment="Left" Padding="0" Command="{Binding OpenBroadcastUrl}" Margin="0,1" IsVisible="{Binding IsBroadcastUrlEnabled}">
+					<TextBlock Text="{Binding BroadcastUrl}" TextDecorations="Underline" Classes="theme-text-body size-sm"/>
+				</Button>
+			</StackPanel>
+		</Border>
+
+		<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Margin="3"
+				BorderBrush="{actipro:ThemeResource Container2BorderBrush}" IsVisible="{Binding IsSchedule}"
+				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+			<StackPanel>
+				<TextBlock Classes="theme-text-heading size-xs" Text="Schedule"/>
+			</StackPanel>
+		</Border>
+	</StackPanel>
+</UserControl>

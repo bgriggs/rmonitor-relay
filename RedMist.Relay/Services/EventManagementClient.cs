@@ -40,16 +40,30 @@ public class EventManagementClient
         return await restClient.GetAsync<Event>(request);
     }
 
-    public async Task SaveEventAsync(Event eventData)
+    public async Task<int> SaveNewEventAsync(Event eventData)
+    {
+        var request = new RestRequest("SaveNewEvent", Method.Post);
+        request.AddJsonBody(eventData);
+        return await restClient.PostAsync<int>(request);
+    }
+
+    public async Task UpdateEventStatusActiveAsync(int eventId)
+    {
+        var request = new RestRequest("UpdateEventStatusActive", Method.Put);
+        request.AddQueryParameter("eventId", eventId);
+        await restClient.PutAsync(request);
+    }
+
+    public async Task UpdateEventAsync(Event eventData)
     {
         var request = new RestRequest("UpdateEvent", Method.Post);
         request.AddJsonBody(eventData);
         await restClient.PostAsync(request);
     }
 
-    public async Task UpdateEventStatusActiveAsync(int eventId)
+    public async Task DeleteEventAsync(int eventId)
     {
-        var request = new RestRequest("UpdateEventStatusActive", Method.Put);
+        var request = new RestRequest("DeleteEvent", Method.Put);
         request.AddQueryParameter("eventId", eventId);
         await restClient.PutAsync(request);
     }

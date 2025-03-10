@@ -26,6 +26,7 @@ public class ViewLocator : IDataTemplate
         RegisterViewFactory<EditOrbitsDialogViewModel, EditOrbitsDialog>();
         RegisterViewFactory<EditX2ServerDialogViewModel, EditX2ServerDialog>();
         RegisterViewFactory<EditControlLogDialogViewModel, EditControlLogDialog>();
+        RegisterViewFactory<EditEventDialogViewModel, EditEventDialog>();
     }
 
     public Control Build(object? data)

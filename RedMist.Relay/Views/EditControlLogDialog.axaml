@@ -15,8 +15,6 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
 		<design:DesignEditControlLogDialogViewModel />
 	</Design.DataContext>
-	<UserControl.Resources>
-	</UserControl.Resources>
 
 	<StackPanel Margin="3" Width="375">
 		<TextBlock Classes="theme-text-heading" Text="Control Log Configuration" Margin="4" HorizontalAlignment="Center"/>

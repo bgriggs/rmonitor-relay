@@ -18,7 +18,7 @@
 	</Design.DataContext>
 
 	<UserControl.Styles>
-		
+
 	</UserControl.Styles>
 
 	<dialog:DialogHost Identifier="MainDialogHost" Background="{actipro:ThemeResource Container2BackgroundBrush}"
@@ -63,7 +63,8 @@
 								CornerRadius="{actipro:ScaledCornerRadius 1.5}"
 								Padding="{actipro:ScaledThickness 1}">
 							<Grid RowDefinitions="Auto,*">
-								<TextBlock Classes="theme-text-heading" Text="Event Settings"/>
+								<TextBlock Classes="theme-text-heading" Text="Event Settings" Margin="0,0,3,3"/>
+								<v:EventView DataContext="{Binding Event}" Grid.Row="1"/>
 							</Grid>
 						</Border>
 					</Grid>

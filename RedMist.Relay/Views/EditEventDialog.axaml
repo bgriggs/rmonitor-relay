@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
+			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
+             x:Class="RedMist.Relay.Views.EditEventDialog"
+			 x:DataType="vm:EditEventDialogViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<design:DesignEditEventDialogViewModel />
+	</Design.DataContext>
+
+	<StackPanel Width="400">
+		<TextBlock Classes="theme-text-heading" Text="Event Configuration" Margin="4" HorizontalAlignment="Center"/>
+
+		<ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto" Height="400">
+			<StackPanel>
+				<TextBox Text="{Binding Name}" Watermark="Name" Margin="1"/>
+				<TextBlock Text="Ex: World Racing League - Barber 2025" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+				<Grid ColumnDefinitions="*,*">
+					<CalendarDatePicker Watermark="Start Date" SelectedDate="{Binding StartDate}" Classes="has-clear-button" IsTodayHighlighted="False" Margin="1,8,1,1" UseFloatingWatermark="True" Grid.Column="0"/>
+					<CalendarDatePicker Watermark="End Date" SelectedDate="{Binding EndDate}" Classes="has-clear-button" IsTodayHighlighted="False" Margin="1,8,1,1" UseFloatingWatermark="True" Grid.Column="1"/>
+				</Grid>
+				<TextBox Text="{Binding EventUrl}" Watermark="Event Supplementals URL" Margin="1,5,1,1"/>
+				<TextBlock Text="URL to event information." Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+
+				<TextBox Text="{Binding TrackName}" Watermark="Track" Margin="1,5,1,1"/>
+				<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+					<TextBox Text="{Binding CourseConfiguration}" Watermark="Course Configuration" Margin="1,1,1,1"/>
+					<TextBlock Text="Ex: Full, Grand, East, etc." Classes="theme-text-body size-xs" Margin="10,1,1,1" Grid.Row="1"/>
+					<TextBox Text="{Binding Distance}" Watermark="Distance" Margin="1,1,1,1" Grid.Column="1"/>
+					<TextBlock Text="Ex: 2.2 mi" Classes="theme-text-body size-xs" Margin="10,1,1,1" Grid.Row="1" Grid.Column="1"/>
+				</Grid>
+				<Expander Header="Schedule" Margin="1,3">
+
+				</Expander>
+
+				<Expander Header="Broadcast" Margin="1,3">
+					<StackPanel>
+						<TextBox Text="{Binding BroadcastCompanyName}" Watermark="Company Name" Margin="1,1,1,1"/>
+						<TextBlock Text="Ex: Driver's Eye" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+						<TextBox Text="{Binding BroadcastUrl}" Watermark="Broadcast URL" Margin="1,1,1,1"/>
+						<TextBlock Text="Ex: https://www.youtube.com/@Racewrl_Go" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+					</StackPanel>
+				</Expander>
+			</StackPanel>
+		</ScrollViewer>
+		<Grid ColumnDefinitions="Auto,*,Auto">
+			<Button Command="{Binding Delete}" Margin="2,3" IsVisible="{Binding AllowDelete}">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Delete" VerticalAlignment="Center"/>
+					<PathIcon Height="16" Width="20" Foreground="Red" Data="{StaticResource delete}" Margin="3,0,0,0"/>
+				</StackPanel>
+			</Button>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="2,3" Grid.Column="2">
+				<Button Classes="ok" Margin="0,0,3,0" Command="{Binding Save}"/>
+				<Button Classes="close"
+						Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialog:DialogHost}, Path=CloseDialogCommand}"/>
+			</StackPanel>
+		</Grid>
+	</StackPanel>
+</UserControl>
