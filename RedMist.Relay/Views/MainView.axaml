@@ -36,7 +36,7 @@
 								<TextBlock Classes="theme-text-heading" Text="Connections"/>
 
 								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="1"
-										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
+										BorderBrush="{actipro:ThemeResource Container2BorderBrush}" Margin="0,5,0,0"
 										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
 									<v:OrganizationView DataContext="{Binding Organization}"></v:OrganizationView>
 								</Border>

@@ -18,7 +18,8 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class OrganizationViewModel : ObservableValidator, IRecipient<HubMessageStatistic>, IRecipient<ValueChangedMessage<HubConnectionState>>
+public partial class OrganizationViewModel : ObservableValidator, IRecipient<HubMessageStatistic>, IRecipient<ValueChangedMessage<HubConnectionState>>,
+    IRecipient<OrganizationConfigurationChanged>
 {
     private readonly OrganizationConfigurationService configurationService;
     private readonly ISettingsProvider settings;
@@ -116,6 +117,9 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         }
     }
 
+    /// <summary>
+    /// Receive the message from the hub that the connection state has changed.
+    /// </summary>
     public void Receive(ValueChangedMessage<HubConnectionState> message)
     {
         Dispatcher.UIThread.Post(() =>
@@ -142,6 +146,9 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
         }, DispatcherPriority.Background);
     }
 
+    /// <summary>
+    /// Receive the message from the hub that the number of messages sent has changed.
+    /// </summary>
     public void Receive(HubMessageStatistic message)
     {
         _ = debouncer.ExecuteAsync(() =>
@@ -152,5 +159,13 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
             }, DispatcherPriority.Background);
             return Task.CompletedTask;
         });
+    }
+
+    /// <summary>
+    /// Receive the organization configuration changed message.
+    /// </summary>
+    public void Receive(OrganizationConfigurationChanged message)
+    {
+        OrgName = configurationService.OrganizationConfiguration?.Name ?? string.Empty;
     }
 }

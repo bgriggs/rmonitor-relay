@@ -95,7 +95,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
                 }
 
                 Logger.LogDebug($"Sending cached messages to hub");
-                await hubClient.SendAsync(eventDataCache.EventNumber, cached);
+                await hubClient.SendRMonitor(eventDataCache.EventNumber, cached);
             }
             else
             {
@@ -131,7 +131,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
             await eventDataCache.Update(data);
             if (eventService.Event != null)
             {
-                await hubClient.SendAsync(eventService.Event.Id, data);
+                await hubClient.SendRMonitor(eventService.Event.Id, data);
             }
             WeakReferenceMessenger.Default.Send(new RMonitorMessageStatistic(rmonitorMessagesReceived));
         }

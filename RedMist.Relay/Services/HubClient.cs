@@ -39,7 +39,7 @@ public class HubClient : HubClientBase
         }
     }
 
-    public async Task<bool> SendAsync(int eventId, string data)
+    public async Task<bool> SendRMonitor(int eventId, string data)
     {
         if (hub is null || hub.State != HubConnectionState.Connected)
         {
