@@ -15,11 +15,13 @@ namespace RedMist.Relay.Services;
 /// <summary>
 /// Take data received from RMonitor endpoint and send to the SignalR hub.
 /// </summary>
-public class RelayService : IRecipient<OrganizationConfigurationChanged>
+public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecipient<EventConfigurationChanged>
 {
     private readonly HubClient hubClient;
     private readonly RMonitorClient rMonitorClient;
     private readonly EventDataCache eventDataCache;
+    private readonly EventService eventService;
+
     public event Action<HubConnectionState>? ConnectionStatusChanged;
     private int rmonitorMessagesReceived;
     private bool lastRmonitorConnected;
@@ -31,12 +33,14 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
     private IDisposable? orbitsConnectionCheckSubscription;
 
 
-    public RelayService(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient, EventDataCache eventDataCache)
+    public RelayService(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient,
+        EventDataCache eventDataCache, EventService eventService)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         this.hubClient = hubClient;
         this.rMonitorClient = rMonitorClient;
         this.eventDataCache = eventDataCache;
+        this.eventService = eventService;
         rMonitorClient.ReceivedData += async (data) => await RMonitorReceiveData(data);
 
         hubClient.ReceivedSendEventData += async () => await SendCachedMessagesAsync();
@@ -82,14 +86,21 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
         var cached = await eventDataCache.GetData();
         try
         {
-            if (eventDataCache.EventNumber > 0)
+            if (eventService.Event != null)
             {
-                Logger.LogDebug("Sending event data to hub: {0}, {1}", eventDataCache.EventNumber, eventDataCache.EventName);
-                await hubClient.SendEventUpdate(eventDataCache.EventNumber, eventDataCache.EventName);
-            }
+                if (!string.IsNullOrEmpty(eventDataCache.EventName))
+                {
+                    Logger.LogDebug("Sending event data to hub: {0}, {1}", eventService.Event.Id, eventDataCache.EventName);
+                    await hubClient.SendEventUpdate(eventService.Event.Id, eventDataCache.EventName);
+                }
 
-            Logger.LogDebug($"Sending cached messages to hub");
-            await hubClient.SendAsync(eventDataCache.EventNumber, cached);
+                Logger.LogDebug($"Sending cached messages to hub");
+                await hubClient.SendAsync(eventDataCache.EventNumber, cached);
+            }
+            else
+            {
+                Logger.LogWarning("No event selected to send cached data to hub");
+            }
         }
         catch (Exception ex)
         {
@@ -107,11 +118,6 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
         return await rMonitorClient.ConnectAsync(rmonitorIp, rmonitorPort, cancellationToken);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
-    {
-        await rMonitorClient.DisconnectAsync(cancellationToken);
-    }
-
     /// <summary>
     /// Aggregate result monitor data locally and to the cloud.
     /// </summary>
@@ -123,7 +129,10 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
             rmonitorMessagesReceived++;
             await CheckForInit(data);
             await eventDataCache.Update(data);
-            await hubClient.SendAsync(eventDataCache.EventNumber, data);
+            if (eventService.Event != null)
+            {
+                await hubClient.SendAsync(eventService.Event.Id, data);
+            }
             WeakReferenceMessenger.Default.Send(new RMonitorMessageStatistic(rmonitorMessagesReceived));
         }
         catch (Exception ex)
@@ -166,6 +175,12 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
 
     #endregion
 
+    #region Notifications
+
+    /// <summary>
+    /// Apply change in configuration.
+    /// </summary>
+    /// <param name="message">new configuration</param>
     public void Receive(OrganizationConfigurationChanged message)
     {
         hubClient.ReloadClientCredentials();
@@ -186,6 +201,17 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>
             // Start X2 connection
         }
     }
+
+    /// <summary>
+    /// Event changed, update the cloud.
+    /// </summary>
+    /// <param name="message"></param>
+    public void Receive(EventConfigurationChanged message)
+    {
+        _ = SendCachedMessagesAsync();
+    }
+
+    #endregion
 
     #region Logging
 
