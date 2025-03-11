@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Utilities;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using DialogHostAvalonia;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
@@ -6,15 +8,29 @@ using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using RedMist.TimingCommon.Models.Configuration;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class EditEventDialogViewModel(Event model) : ObservableValidator
+public partial class EditEventDialogViewModel : ObservableValidator
 {
-    public Event Model { get; } = model;
+    private Event model;
+    public Event Model
+    {
+        get => model;
+        protected set
+        {
+            model = value;
+            InitializeSchedule(model.Schedule.Entries, Schedule, StartDate, EndDate);
+        }
+    }
 
     [Required]
     [StringLength(512, MinimumLength = 5)]
@@ -74,6 +90,8 @@ public partial class EditEventDialogViewModel(Event model) : ObservableValidator
         set => SetProperty(Model.Distance, value, Model, (u, n) => u.Distance = n, validate: true);
     }
 
+    #region Broadcast
+
     [StringLength(128)]
     public string BroadcastCompanyName
     {
@@ -89,7 +107,22 @@ public partial class EditEventDialogViewModel(Event model) : ObservableValidator
         set => SetProperty(Model.Broadcast.Url, value, Model, (u, n) => u.Broadcast.Url = n, validate: true);
     }
 
+    #endregion
+
+    #region Schedule
+
+    public ObservableCollection<DayScheduleViewModel> Schedule { get; } = [];
+
+    #endregion
+
     public bool AllowDelete => Model.Id > 0;
+
+
+    public EditEventDialogViewModel(Event model)
+    {
+        this.model = model;
+        Model = model;
+    }
 
 
     public async Task Save()
@@ -115,6 +148,7 @@ public partial class EditEventDialogViewModel(Event model) : ObservableValidator
         }
         else
         {
+            Model.Schedule.Entries = [.. Schedule.SelectMany(e => e.EntryViewModels.Select(s => s.Model))];
             DialogHost.Close("MainDialogHost", Model);
         }
     }
@@ -145,4 +179,176 @@ public partial class EditEventDialogViewModel(Event model) : ObservableValidator
         }
         return ValidationResult.Success!;
     }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName == nameof(StartDate) || e.PropertyName == nameof(EndDate))
+        {
+            InitializeSchedule(model.Schedule.Entries, Schedule, StartDate, EndDate);
+        }
+    }
+
+    public static void InitializeSchedule(List<EventScheduleEntry> entries, ObservableCollection<DayScheduleViewModel> schedule, DateTime start, DateTime end)
+    {
+        if ((end > start) && (end - start < TimeSpan.FromDays(5)))
+        {
+            schedule.Clear();
+            var currentDay = start.Date;
+            while (currentDay <= end.Date)
+            {
+                // select entries by first day, second day, etc. rather than exact date?
+                var dayEntries = entries.Where(x => x.DayOfEvent.Date == currentDay).OrderBy(x => x.StartTime).ToList();
+                schedule.Add(new DayScheduleViewModel(currentDay, dayEntries));
+                currentDay = currentDay.AddDays(1);
+            }
+        }
+        else
+        {
+            // Log when the schedule is too long
+        }
+    }
+}
+
+public partial class DayScheduleViewModel : ObservableValidator, IRecipient<DeleteScheduleDayEntryCommand>
+{
+    private readonly DateTime day;
+    public string DayString { get; }
+    public ObservableCollection<DayScheduleEntryViewModel> EntryViewModels { get; } = [];
+
+    public DayScheduleViewModel(DateTime day, List<EventScheduleEntry> dayEntries)
+    {
+        foreach (var e in dayEntries.OrderBy(x => x.StartTime))
+        {
+            EntryViewModels.Add(new DayScheduleEntryViewModel(e));
+        }
+
+        var dtf = new CultureInfo("en-US", false).DateTimeFormat;
+        dtf.DayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        DayString = dtf.GetDayName(day.DayOfWeek) + ", " + day.ToString("MM/dd");
+        this.day = day;
+
+        WeakReferenceMessenger.Default.RegisterAll(this);
+    }
+
+    public void AddEntry()
+    {
+        var entryVm = new DayScheduleEntryViewModel(new EventScheduleEntry
+        {
+            DayOfEvent = day,
+            StartTime = new DateTime(1, 1, 1, 9, 0, 0),
+            EndTime = new DateTime(1, 1, 1, 17, 0, 0),
+            Name = string.Empty
+        });
+
+        if (EntryViewModels.Any())
+        {
+            var lastEntry = EntryViewModels.Last();
+            entryVm.Model.StartTime = lastEntry.Model.EndTime;
+            entryVm.Model.EndTime = entryVm.Model.StartTime.Add(TimeSpan.FromHours(1));
+            entryVm.InitializeTime();
+        }
+
+        EntryViewModels.Add(entryVm);
+    }
+
+    /// <summary>
+    /// Delete row.
+    /// </summary>
+    /// <param name="message">row to delete</param>
+    public void Receive(DeleteScheduleDayEntryCommand message)
+    {
+        EntryViewModels.Remove(message.Vm);
+    }
+}
+
+public partial class DayScheduleEntryViewModel : ObservableValidator
+{
+    public EventScheduleEntry Model { get; }
+
+    [Required]
+    [StringLength(60, MinimumLength = 3)]
+    public string Name
+    {
+        get => Model.Name;
+        set => SetProperty(Model.Name, value, Model, (u, n) => u.Name = n, validate: true);
+    }
+
+    private string startTimeStr = string.Empty;
+    [CustomValidation(typeof(DayScheduleEntryViewModel), nameof(ValidateEndTimeAfterStartTime))]
+    [CustomValidation(typeof(DayScheduleEntryViewModel), nameof(ValidateTime))]
+    public string StartTime
+    {
+        get => startTimeStr;
+        set
+        {
+            if (SetProperty(Model.StartTime.ToString("h:mm tt"), value, Model, (u, n) => { DateTime.TryParseExact(n, "h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dt); u.StartTime = dt; }, validate: true))
+            {
+                startTimeStr = value;
+                ValidateProperty(EndTime, nameof(EndTime));
+            }
+        }
+    }
+
+    private string endTimeStr = string.Empty;
+    [Required]
+    public string EndTime
+    {
+        get => endTimeStr;
+        set
+        {
+            if (SetProperty(Model.EndTime.ToString("h:mm tt"), value, Model, (u, n) => { DateTime.TryParseExact(n, "h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dt); u.EndTime = dt; }, validate: true))
+            {
+                endTimeStr = value;
+            }
+        }
+    }
+
+
+    public DayScheduleEntryViewModel(EventScheduleEntry model)
+    {
+        Model = model;
+        InitializeTime();
+    }
+
+
+    public void InitializeTime()
+    {
+        startTimeStr = Model.StartTime.ToString("h:mm tt");
+        endTimeStr = Model.EndTime.ToString("h:mm tt");
+    }
+
+    public static ValidationResult ValidateTime(string time, ValidationContext context)
+    {
+        if (DateTime.TryParseExact(time, "h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dt))
+        {
+            return ValidationResult.Success!;
+        }
+
+        return new ValidationResult("Time must be in format: hh:mm tt");
+    }
+
+    public static ValidationResult ValidateEndTimeAfterStartTime(DateTime endDate, ValidationContext context)
+    {
+        var instance = context.ObjectInstance as EditEventDialogViewModel;
+        if (instance != null && endDate.TimeOfDay <= instance.StartDate.TimeOfDay)
+        {
+            return new ValidationResult("End time must be after start time.");
+        }
+        return ValidationResult.Success!;
+    }
+
+    public void DeleteEntry(object row)
+    {
+        if (row is DayScheduleEntryViewModel vm)
+        {
+            WeakReferenceMessenger.Default.Send(new DeleteScheduleDayEntryCommand(vm));
+        }
+    }
+}
+
+public class DeleteScheduleDayEntryCommand(DayScheduleEntryViewModel vm)
+{
+    public DayScheduleEntryViewModel Vm { get; } = vm;
 }

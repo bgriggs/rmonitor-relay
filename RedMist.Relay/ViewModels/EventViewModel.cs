@@ -63,6 +63,7 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
     public string BroadcastUrl => EventData?.Broadcast?.Url ?? string.Empty;
     public bool IsBroadcastUrlEnabled => !string.IsNullOrEmpty(EventData?.Broadcast?.Url);
     public bool IsSchedule => EventData?.Schedule?.Entries?.Count > 0;
+    public ObservableCollection<DayScheduleViewModel> Schedule { get; } = [];
 
     private bool isInitialized = false;
 
@@ -91,6 +92,10 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
         SelectedEvent = eventSummaries.FirstOrDefault(s => s.IsActive);
     }
 
+    /// <summary>
+    /// As user selects event in the combo box, make it the event that the system will use
+    /// to associate data received from the timing systems.
+    /// </summary>
     private async void UpdateActiveEvent(int? eventId)
     {
         if (eventId is null)
@@ -102,6 +107,12 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             try
             {
                 EventData = await eventService.UpdateEventActiveAndLoadAsync(eventId.Value);
+
+                Schedule.Clear();
+                if (EventData != null)
+                {
+                    EditEventDialogViewModel.InitializeSchedule(EventData.Schedule.Entries, Schedule, EventData.StartDate, EventData.EndDate);
+                }
             }
             catch (Exception ex)
             {

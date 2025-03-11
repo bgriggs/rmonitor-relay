@@ -59,6 +59,27 @@
 				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
 			<StackPanel>
 				<TextBlock Classes="theme-text-heading size-xs" Text="Schedule"/>
+				<ItemsRepeater ItemsSource="{Binding Schedule}">
+					<ItemsRepeater.ItemTemplate>
+						<DataTemplate DataType="vm:DayScheduleViewModel">
+							<StackPanel>
+								<TextBlock Text="{Binding DayString}" Classes="theme-text-body size-sm"/>
+								<ItemsRepeater ItemsSource="{Binding EntryViewModels}">
+									<ItemsRepeater.ItemTemplate>
+										<DataTemplate DataType="vm:DayScheduleEntryViewModel">
+											<StackPanel Orientation="Horizontal" Margin="11,0,0,0">
+												<TextBlock Text="{Binding StartTime}"/>
+												<TextBlock Text="-"/>
+												<TextBlock Text="{Binding EndTime}"/>
+												<TextBlock Text="{Binding Name}" Margin="6,0,0,0"/>
+											</StackPanel>
+										</DataTemplate>
+									</ItemsRepeater.ItemTemplate>
+								</ItemsRepeater>
+							</StackPanel>
+						</DataTemplate>
+					</ItemsRepeater.ItemTemplate>
+				</ItemsRepeater>
 			</StackPanel>
 		</Border>
 	</StackPanel>

@@ -6,7 +6,7 @@
 			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
 			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
 			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="500"
              x:Class="RedMist.Relay.Views.EditEventDialog"
 			 x:DataType="vm:EditEventDialogViewModel">
 	<Design.DataContext>
@@ -15,7 +15,7 @@
 		<design:DesignEditEventDialogViewModel />
 	</Design.DataContext>
 
-	<StackPanel Width="400">
+	<StackPanel Width="450">
 		<TextBlock Classes="theme-text-heading" Text="Event Configuration" Margin="4" HorizontalAlignment="Center"/>
 
 		<ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto" Height="400">
@@ -36,8 +36,36 @@
 					<TextBox Text="{Binding Distance}" Watermark="Distance" Margin="1,1,1,1" Grid.Column="1"/>
 					<TextBlock Text="Ex: 2.2 mi" Classes="theme-text-body size-xs" Margin="10,1,1,1" Grid.Row="1" Grid.Column="1"/>
 				</Grid>
-				<Expander Header="Schedule" Margin="1,3">
-
+				<!--Schedule-->
+				<Expander Header="Schedule" Margin="1,3" IsExpanded="True" Padding="2,1,5,5">
+					<ItemsRepeater ItemsSource="{Binding Schedule}">
+						<ItemsRepeater.ItemTemplate>
+							<DataTemplate DataType="vm:DayScheduleViewModel">
+								<StackPanel>
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBlock Text="{Binding DayString}" Classes="theme-text-body size-sm" Margin="1,1,1,1"/>
+										<Button Classes="icon" Command="{Binding AddEntry}" Margin="3,0,0,0" Grid.Column="1" ToolTip.Tip="Add entry">
+											<PathIcon Height="12" Width="12" Foreground="Green" Data="{StaticResource addgeom}"/>
+										</Button>
+									</Grid>
+									<ItemsRepeater ItemsSource="{Binding EntryViewModels}" Margin="5,0,0,0">
+										<ItemsRepeater.ItemTemplate>
+											<DataTemplate DataType="vm:DayScheduleEntryViewModel">
+												<Grid ColumnDefinitions="Auto,Auto,*,Auto">
+													<TextBox Text="{Binding StartTime, UpdateSourceTrigger=LostFocus}" Watermark="hh:mm am/pm" Padding="3" Height="27" IsTabStop="True" TabIndex="1"/>
+													<TextBox Text="{Binding EndTime, UpdateSourceTrigger=LostFocus}" Watermark="hh:mm am/pm" Grid.Column="1" Padding="3" Height="27" IsTabStop="True" TabIndex="2"/>
+													<TextBox Text="{Binding Name}" Grid.Column="2" Padding="3" Height="27" IsTabStop="True" TabIndex="3"/>
+													<Button Classes="icon" Command="{Binding DeleteEntry}" CommandParameter="{Binding .}" Margin="3,0,0,0" ToolTip.Tip="Remove entry" Grid.Column="3">
+														<PathIcon Height="12" Width="12" Foreground="Red" Data="{StaticResource xgeom}"/>
+													</Button>
+												</Grid>
+											</DataTemplate>
+										</ItemsRepeater.ItemTemplate>
+									</ItemsRepeater>
+								</StackPanel>
+							</DataTemplate>
+						</ItemsRepeater.ItemTemplate>
+					</ItemsRepeater>
 				</Expander>
 
 				<Expander Header="Broadcast" Margin="1,3">
