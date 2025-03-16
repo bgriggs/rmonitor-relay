@@ -17,9 +17,12 @@ public class EventDataCache
     private readonly Dictionary<string, string> h = [];
     private readonly SemaphoreSlim semaphore = new(1, 1);
 
-    public int EventNumber { get; set; }
-    public string EventName { get; set; } = string.Empty;
-    public event Action<(int eventId, string name)>? EventChanged;
+    /// <summary>
+    /// ID from $B message.
+    /// </summary>
+    public int SessionNumber { get; set; }
+    public string SessionName { get; set; } = string.Empty;
+    public event Action<(int sessionId, string name)>? SessionChanged;
 
 
     public async Task Update(string data)
@@ -52,10 +55,10 @@ public class EventDataCache
                     b = p;
                     if (int.TryParse(msgParts[1], out int en))
                     {
-                        EventNumber = en;
+                        SessionNumber = en;
                     }
-                    EventName = msgParts[2];
-                    EventChanged?.Invoke((EventNumber, EventName));
+                    SessionName = msgParts[2];
+                    SessionChanged?.Invoke((SessionNumber, SessionName));
                 }
                 // C - Class information
                 else if (cmd == "$C" && msgParts.Length > 1)
@@ -104,7 +107,7 @@ public class EventDataCache
             g.Clear();
             gStarting.Clear();
             h.Clear();
-            EventNumber = 0;
+            SessionNumber = 0;
         }
         finally
         {

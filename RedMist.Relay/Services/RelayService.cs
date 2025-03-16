@@ -46,7 +46,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         hubClient.ReceivedSendEventData += async () => await SendCachedMessagesAsync();
         hubClient.ConnectionStatusChanged += async (state) => await OnHubConnectionChanged(state);
 
-        eventDataCache.EventChanged += async (e) => await hubClient.SendEventUpdate(e.eventId, e.name);
+        eventDataCache.SessionChanged += async (e) => await hubClient.SendSessionChange(eventService.Event?.Id ?? 0, e.sessionId, e.name);
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
@@ -88,14 +88,14 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         {
             if (eventService.Event != null)
             {
-                if (!string.IsNullOrEmpty(eventDataCache.EventName))
+                if (!string.IsNullOrEmpty(eventDataCache.SessionName))
                 {
-                    Logger.LogDebug("Sending event data to hub: {0}, {1}", eventService.Event.Id, eventDataCache.EventName);
-                    await hubClient.SendEventUpdate(eventService.Event.Id, eventDataCache.EventName);
+                    Logger.LogDebug("Sending session data to hub: {0}, {1}", eventDataCache.SessionNumber, eventDataCache.SessionName);
+                    await hubClient.SendSessionChange(eventService.Event.Id, eventDataCache.SessionNumber, eventDataCache.SessionName);
                 }
 
                 Logger.LogDebug($"Sending cached messages to hub");
-                await hubClient.SendRMonitor(eventDataCache.EventNumber, cached);
+                await hubClient.SendRMonitor(eventService.Event.Id, eventDataCache.SessionNumber, cached);
             }
             else
             {
@@ -128,10 +128,13 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         {
             rmonitorMessagesReceived++;
             await CheckForInit(data);
+
+            // Process the cache to ensure we catch changes in sessions ($B) before sending to the hub with the incorrect session number
             await eventDataCache.Update(data);
+
             if (eventService.Event != null)
             {
-                await hubClient.SendRMonitor(eventService.Event.Id, data);
+                await hubClient.SendRMonitor(eventService.Event.Id, eventDataCache.SessionNumber, data);
             }
             WeakReferenceMessenger.Default.Send(new RMonitorMessageStatistic(rmonitorMessagesReceived));
         }

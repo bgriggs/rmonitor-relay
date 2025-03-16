@@ -39,7 +39,7 @@ public class HubClient : HubClientBase
         }
     }
 
-    public async Task<bool> SendRMonitor(int eventId, string data)
+    public async Task<bool> SendRMonitor(int eventId, int sessionId, string data)
     {
         if (hub is null || hub.State != HubConnectionState.Connected)
         {
@@ -47,28 +47,28 @@ public class HubClient : HubClientBase
             return false;
         }
 
-        await hub.SendAsync("SendRMonitor", eventId, data, stoppingToken);
+        await hub.SendAsync("SendRMonitor", eventId, sessionId, data, stoppingToken);
         MessagesSent++;
         WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         return true;
     }
 
-    public async Task SendEventUpdate(int eventId, string eventName)
+    public async Task SendSessionChange(int eventId, int sessionId, string sessionName)
     {
         try
         {
             if (hub is null || hub.State != HubConnectionState.Connected)
             {
-                Logger.LogTrace("Hub not connected, unable to send event update");
+                Logger.LogTrace("Hub not connected, unable to send session update");
                 return;
             }
-            await hub.SendAsync("SendEventUpdate", eventId, eventName, stoppingToken);
+            await hub.SendAsync("SendSessionChange", eventId, sessionId, sessionName, stoppingToken);
             MessagesSent++;
             WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to send event update");
+            Logger.LogError(ex, "Failed to send session update");
         }
     }
 }

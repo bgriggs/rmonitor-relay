@@ -6,8 +6,9 @@ namespace RedMist.ReplayRMonitorData;
 
 internal class Program
 {
-    const string TEST_FILE = "ec-test-data.txt";
-    const double REPLAY_SPEED = 2.0;
+    //const string TEST_FILE = "ec-test-data.txt";
+    const string TEST_FILE = "barber2025.txt";
+    const double REPLAY_SPEED = 5.0;
 
     static void Main(string[] args)
     {
@@ -40,7 +41,13 @@ internal class Program
                     Console.WriteLine(data);
                     var bytes = Encoding.UTF8.GetBytes(data);
                     clientSocket.Send(bytes);
-                    Thread.Sleep((int)(eventData.GetNextTime().TotalMilliseconds / REPLAY_SPEED));
+                    var duration = (int)(eventData.GetNextTime().TotalMilliseconds / REPLAY_SPEED);
+                    if (duration < 0)
+                        duration = 0;
+                    else if (duration > 10000)
+                        duration = 10000;
+
+                    Thread.Sleep(duration);
                     data = eventData.GetNextData();
                 }
             }

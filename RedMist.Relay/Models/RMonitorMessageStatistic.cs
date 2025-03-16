@@ -3,7 +3,7 @@
 namespace RedMist.Relay.Models;
 
 /// <summary>
-/// Messages sent to the cloud.
+/// Messages received from the timing system.
 /// </summary>
 /// <param name="value"></param>
 public class RMonitorMessageStatistic(int value) : ValueChangedMessage<int>(value)
