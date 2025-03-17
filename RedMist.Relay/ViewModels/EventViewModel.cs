@@ -107,18 +107,22 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             try
             {
                 EventData = await eventService.UpdateEventActiveAndLoadAsync(eventId.Value);
-
-                Schedule.Clear();
-                if (EventData != null)
-                {
-                    EditEventDialogViewModel.InitializeSchedule(EventData.Schedule.Entries, Schedule, EventData.StartDate, EventData.EndDate);
-                }
+                RefreshSchedule();
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to update active event.");
                 MessageBoxManager.GetMessageBoxStandard("Error", "Failed to update active event.", ButtonEnum.Ok, Icon.Error);
             }
+        }
+    }
+
+    private void RefreshSchedule()
+    {
+        Schedule.Clear();
+        if (EventData != null)
+        {
+            EditEventDialogViewModel.InitializeSchedule(EventData.Schedule.Entries, Schedule, EventData.StartDate, EventData.EndDate);
         }
     }
 
@@ -140,6 +144,7 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             try
             {
                 EventData = updatedEvent;
+                RefreshSchedule();
                 await eventService.UpdateEventAsync(updatedEvent);
             }
             catch (Exception ex)

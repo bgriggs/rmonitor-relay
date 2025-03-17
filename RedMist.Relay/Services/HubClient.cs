@@ -62,7 +62,7 @@ public class HubClient : HubClientBase
                 Logger.LogTrace("Hub not connected, unable to send session update");
                 return;
             }
-            await hub.SendAsync("SendSessionChange", eventId, sessionId, sessionName, stoppingToken);
+            await hub.SendAsync("SendSessionChange", eventId, sessionId, sessionName, GetLocalTimeZoneOffset(), stoppingToken);
             MessagesSent++;
             WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         }
@@ -70,5 +70,13 @@ public class HubClient : HubClientBase
         {
             Logger.LogError(ex, "Failed to send session update");
         }
+    }
+
+    public static double GetLocalTimeZoneOffset()
+    {
+        TimeZoneInfo localZone = TimeZoneInfo.Local;
+        DateTimeOffset now = DateTimeOffset.Now;
+        TimeSpan offset = localZone.GetUtcOffset(now);
+        return offset.TotalHours;
     }
 }
