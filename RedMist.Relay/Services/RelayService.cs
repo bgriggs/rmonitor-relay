@@ -1,10 +1,15 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using BigMission.Shared.Utilities;
+using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RedMist.Relay.Common;
 using RedMist.Relay.Models;
+using RedMist.TimingCommon.Models.Configuration;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
@@ -13,14 +18,17 @@ using System.Threading.Tasks;
 namespace RedMist.Relay.Services;
 
 /// <summary>
-/// Take data received from RMonitor endpoint and send to the SignalR hub.
+/// Takes data received from RMonitor and X2 endpoints and sends to the cloud SignalR hub.
 /// </summary>
-public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecipient<EventConfigurationChanged>
+public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecipient<EventConfigurationChanged>,
+    IRecipient<X2ReceivedLoop>, IRecipient<X2ReceivedPassing>
 {
     private readonly HubClient hubClient;
     private readonly RMonitorClient rMonitorClient;
     private readonly EventDataCache eventDataCache;
     private readonly EventService eventService;
+    private readonly IConfiguration configuration;
+    private readonly IX2Client? x2Client;
 
     public event Action<HubConnectionState>? ConnectionStatusChanged;
     private int rmonitorMessagesReceived;
@@ -31,22 +39,30 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
 
     private ILogger Logger { get; }
     private IDisposable? orbitsConnectionCheckSubscription;
+    private bool isX2Stated;
+    private X2Configuration? x2Configuration;
 
 
     public RelayService(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient,
-        EventDataCache eventDataCache, EventService eventService)
+        EventDataCache eventDataCache, EventService eventService, IX2Client x2Client, IConfiguration configuration)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         this.hubClient = hubClient;
         this.rMonitorClient = rMonitorClient;
         this.eventDataCache = eventDataCache;
         this.eventService = eventService;
+        this.configuration = configuration;
+        if (x2Client.GetType() != typeof(NullX2Client))
+        {
+            this.x2Client = x2Client;
+        }
+
         rMonitorClient.ReceivedData += async (data) => await RMonitorReceiveData(data);
 
         hubClient.ReceivedSendEventData += async () => await SendCachedMessagesAsync();
         hubClient.ConnectionStatusChanged += async (state) => await OnHubConnectionChanged(state);
 
-        eventDataCache.SessionChanged += async (e) => await hubClient.SendSessionChange(eventService.Event?.Id ?? 0, e.sessionId, e.name);
+        eventDataCache.SessionChanged += async (e) => await hubClient.SendSessionChangeAsync(eventService.Event?.Id ?? 0, e.sessionId, e.name);
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
@@ -78,12 +94,13 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         if (state == HubConnectionState.Connected)
         {
             await SendCachedMessagesAsync();
+            await SendCachedPassingsAsync();
         }
     }
 
     private async Task SendCachedMessagesAsync()
     {
-        var cached = await eventDataCache.GetData();
+        var cached = await eventDataCache.GetRMonitorData();
         try
         {
             if (eventService.Event != null)
@@ -91,11 +108,11 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
                 if (!string.IsNullOrEmpty(eventDataCache.SessionName))
                 {
                     Logger.LogDebug("Sending session data to hub: {0}, {1}", eventDataCache.SessionNumber, eventDataCache.SessionName);
-                    await hubClient.SendSessionChange(eventService.Event.Id, eventDataCache.SessionNumber, eventDataCache.SessionName);
+                    await hubClient.SendSessionChangeAsync(eventService.Event.Id, eventDataCache.SessionNumber, eventDataCache.SessionName);
                 }
 
                 Logger.LogDebug($"Sending cached messages to hub");
-                await hubClient.SendRMonitor(eventService.Event.Id, eventDataCache.SessionNumber, cached);
+                await hubClient.SendRMonitorAsync(eventService.Event.Id, eventDataCache.SessionNumber, cached);
             }
             else
             {
@@ -130,11 +147,11 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
             await CheckForInit(data);
 
             // Process the cache to ensure we catch changes in sessions ($B) before sending to the hub with the incorrect session number
-            await eventDataCache.Update(data);
+            await eventDataCache.UpdateRMonitor(data);
 
             if (eventService.Event != null)
             {
-                await hubClient.SendRMonitor(eventService.Event.Id, eventDataCache.SessionNumber, data);
+                await hubClient.SendRMonitorAsync(eventService.Event.Id, eventDataCache.SessionNumber, data);
             }
             WeakReferenceMessenger.Default.Send(new RMonitorMessageStatistic(rmonitorMessagesReceived));
         }
@@ -178,6 +195,96 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
 
     #endregion
 
+    #region X2
+
+    public void StartX2(CancellationToken cancellationToken = default)
+    {
+        if (x2Client == null || isX2Stated)
+            return;
+
+        isX2Stated = true;
+
+        _ = Task.Run(async () =>
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    if (x2Client?.ConnectionState == ConnectionState.Disconnected)
+                    {
+                        var config = x2Configuration;
+                        if (config != null)
+                        {
+                            var key = configuration["AesKey"] ?? throw new ArgumentNullException("AesKey not found");
+                            var encryption = new EncryptionService(key, Consts.IV);
+                            var password = encryption.Decrypt(config.Password);
+
+                            bool? result = x2Client?.Connect(config.Server, config.Username, password);
+                            if (result is not true)
+                            {
+                                Logger.LogWarning("Failed to connect to X2 server. Retrying in 10 seconds.");
+                                await Task.Delay(TimeSpan.FromSeconds(7));
+                            }
+                        }
+                        else
+                        {
+                            Logger.LogDebug("X2 configuration not found. Not able to start connection to X2 server.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Failed to start X2 connection");
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(3));
+            }
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Receives X2 Loop changes.
+    /// </summary>
+    public void Receive(X2ReceivedLoop message)
+    {
+        _ = Task.Run(async () =>
+        {
+            if (eventService.Event != null)
+            {
+                await hubClient.SendLoopsAsync(eventService.Event.Id, message.Loops);
+            }
+        });
+    }
+
+    /// <summary>
+    /// Receives X2 Passing changes.
+    /// </summary>
+    public void Receive(X2ReceivedPassing message)
+    {
+        _ = Task.Run(async () =>
+        {
+            if (eventService.Event != null)
+            {
+                bool result = await hubClient.SendPassingsAsync(eventService.Event.Id, message.Passings);
+                if (!result)
+                {
+                    eventDataCache.UpdatePassings(message.Passings);
+                }
+            }
+        });
+    }
+
+    private async Task SendCachedPassingsAsync()
+    {
+        var passings = eventDataCache.GetPassingsWithClear();
+        if (passings.Count != 0 && eventService.Event != null)
+        {
+            await hubClient.SendPassingsAsync(eventService.Event.Id, passings);
+        }
+    }
+
+    #endregion
+
     #region Notifications
 
     /// <summary>
@@ -199,9 +306,10 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
             });
         }
 
-        if (message.Organization?.X2 != null)
+        x2Configuration = message.Organization?.X2;
+        if (x2Configuration != null)
         {
-            // Start X2 connection
+            StartX2(CancellationToken.None);
         }
     }
 

@@ -50,6 +50,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\BigMission.Shared\BigMission.Shared\BigMission.Shared.csproj" />
 	  <ProjectReference Include="..\redmist-timing-common\RedMist.TimingCommon\RedMist.TimingCommon.csproj" />
+	  <ProjectReference Include="..\RedMist.Relay.Common\RedMist.Relay.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

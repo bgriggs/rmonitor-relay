@@ -7,6 +7,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
+using RedMist.Relay.Common;
 using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;

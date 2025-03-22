@@ -1,4 +1,4 @@
-﻿namespace RedMist.Relay.Models;
+﻿namespace RedMist.Relay.Common;
 
 /// <summary>
 /// General connection state used for various connections and in the connection icon.

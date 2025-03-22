@@ -6,12 +6,18 @@ using BigMission.Avalonia.LogViewer.Extensions;
 using CommunityToolkit.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using LogViewer.Core.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MsLogger.Core;
+using RedMist.Relay.Common;
 using RedMist.Relay.Services;
 using RedMist.Relay.ViewModels;
 using RedMist.Relay.Views;
+using System.IO;
+using System.Linq;
+using System.Runtime.Loader;
 using System.Threading;
 
 namespace RedMist.Relay;
@@ -44,6 +50,7 @@ public partial class App : Application
         ConfigureServices(services);
         ConfigureViewModels(services);
         ConfigureViews(services);
+        ConfigureDynamicServices(services);
 
         services.AddSingleton(service => new MainWindow
         {
@@ -94,6 +101,33 @@ public partial class App : Application
     [Singleton(typeof(EditControlLogDialog))]
     [Singleton(typeof(EditEventDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
+
+    private void ConfigureDynamicServices(IServiceCollection services)
+    {
+        var serviceProvider = services.BuildServiceProvider();
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        var logger = loggerFactory.CreateLogger(GetType().Name);
+        var x2Path = configuration["X2DllPath"];
+        if (File.Exists(x2Path))
+        {
+            x2Path = Path.GetFullPath(x2Path);
+            logger.LogInformation("Loading X2 DLL from {0}", x2Path);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(x2Path);
+            var serviceType = typeof(IX2Client);
+            var implementation = assembly.GetTypes().FirstOrDefault(t => serviceType.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+            if (implementation is not null)
+            {
+                services.AddSingleton(serviceType, implementation);
+                logger.LogInformation("X2 DLL loaded successfully");
+            }
+        }
+        else
+        {
+            logger.LogWarning("X2 DLL not found at {0}", x2Path);
+            services.AddSingleton<IX2Client, NullX2Client>();
+        }
+    }
 
     private void TrayIcon_Clicked(object? sender, System.EventArgs e)
     {

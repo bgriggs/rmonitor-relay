@@ -2,7 +2,7 @@
 
 public class DesignX2ServerViewModel : X2ServerViewModel
 {
-    public DesignX2ServerViewModel() : base(new DesignOrganizationConfigurationService(), new DebugLoggerFactory(), new DesignConfiguration())
+    public DesignX2ServerViewModel() : base(new DesignOrganizationConfigurationService(), new DebugLoggerFactory(), new DesignConfiguration(), new DesignX2Client())
     {        
     }
 }

@@ -8,6 +8,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
+using RedMist.Relay.Common;
 using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
@@ -31,7 +32,7 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
     [ObservableProperty]
     private ConnectionState rmonitorConnectionState = ConnectionState.Disconnected;
 
-    private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
+    private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(400));
     private readonly OrganizationConfigurationService configurationService;
     [ObservableProperty]
     private ConnectionState orbitsLogsConnectionState = ConnectionState.Disconnected;

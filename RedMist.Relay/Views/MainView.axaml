@@ -17,10 +17,6 @@
 		<design:DesignMainViewModel />
 	</Design.DataContext>
 
-	<UserControl.Styles>
-
-	</UserControl.Styles>
-
 	<dialog:DialogHost Identifier="MainDialogHost" Background="{actipro:ThemeResource Container2BackgroundBrush}"
 					   DialogMargin="3" dialog:DialogHostStyle.CornerRadius="4" DisableOpeningAnimation="True">
 		<Border Background="{actipro:ThemeResource Container1BackgroundBrush}"
@@ -45,7 +41,7 @@
 										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
 									<v:OrbitsView DataContext="{Binding Orbits}"/>
 								</Border>
-								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2"
+								<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Grid.Row="2" IsVisible="{Binding X2Server.IsSdkEnabled}"
 										BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
 										CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
 									<v:X2ServerView DataContext="{Binding X2Server}"/>

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using RedMist.TimingCommon.Models.X2;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,8 +26,10 @@ public class EventDataCache
     public string SessionName { get; set; } = string.Empty;
     public event Action<(int sessionId, string name)>? SessionChanged;
 
+    private readonly Dictionary<uint, Passing> passings = [];
 
-    public async Task Update(string data)
+
+    public async Task UpdateRMonitor(string data)
     {
         await semaphore.WaitAsync();
         try
@@ -33,7 +37,7 @@ public class EventDataCache
             var parts = data.Split('\n');
             foreach (var p in parts)
             {
-                var msgParts = Parse(p);
+                var msgParts = ParseRMonitor(p);
                 var cmd = msgParts[0];
 
                 // https://github.com/bradfier/rmonitor/blob/master/docs/RMonitor%20Timing%20Protocol.pdf
@@ -115,7 +119,7 @@ public class EventDataCache
         }
     }
 
-    private static string[] Parse(string p)
+    private static string[] ParseRMonitor(string p)
     {
         var data = p.Split(',');
         for (int i = 0; i < data.Length; i++)
@@ -125,7 +129,7 @@ public class EventDataCache
         return data;
     }
 
-    public async Task<string> GetData()
+    public async Task<string> GetRMonitorData()
     {
         await semaphore.WaitAsync();
         try
@@ -168,4 +172,40 @@ public class EventDataCache
             semaphore.Release();
         }
     }
+
+    #region Passings
+
+    public void UpdatePassing(List<Passing> passings)
+    {
+        lock (passings)
+        {
+            // Add passings to the cache
+            foreach (var passing in passings)
+            {
+                this.passings[passing.Id] = passing;
+            }
+        }
+    }
+
+    public List<Passing> GetPassingsWithClear()
+    {
+        lock (passings)
+        {
+            var result = passings.Values.ToList();
+            passings.Clear();
+            return result;
+        }
+    }
+
+    internal void UpdatePassingS(List<Passing> passings)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal void UpdatePassings(List<Passing> passings)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 }

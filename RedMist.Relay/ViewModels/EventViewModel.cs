@@ -21,7 +21,7 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
     private ILogger Logger { get; }
     private readonly EventService eventService;
 
-    private ObservableCollection<EventSummary> eventSummaries = [];
+    private readonly ObservableCollection<EventSummary> eventSummaries = [];
     public ObservableCollection<EventSummary> EventSummaries => eventSummaries;
 
     private EventSummary? selectedEvent;

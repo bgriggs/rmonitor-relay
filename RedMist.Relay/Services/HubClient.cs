@@ -4,7 +4,10 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RedMist.Relay.Models;
+using RedMist.TimingCommon.Models;
+using RedMist.TimingCommon.Models.X2;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +42,7 @@ public class HubClient : HubClientBase
         }
     }
 
-    public async Task<bool> SendRMonitor(int eventId, int sessionId, string data)
+    public async Task<bool> SendRMonitorAsync(int eventId, int sessionId, string data)
     {
         if (hub is null || hub.State != HubConnectionState.Connected)
         {
@@ -53,7 +56,7 @@ public class HubClient : HubClientBase
         return true;
     }
 
-    public async Task SendSessionChange(int eventId, int sessionId, string sessionName)
+    public async Task SendSessionChangeAsync(int eventId, int sessionId, string sessionName)
     {
         try
         {
@@ -72,11 +75,55 @@ public class HubClient : HubClientBase
         }
     }
 
-    public static double GetLocalTimeZoneOffset()
+    private static double GetLocalTimeZoneOffset()
     {
         TimeZoneInfo localZone = TimeZoneInfo.Local;
         DateTimeOffset now = DateTimeOffset.Now;
         TimeSpan offset = localZone.GetUtcOffset(now);
         return offset.TotalHours;
+    }
+
+    public async Task<bool> SendLoopsAsync(int eventId, List<Loop> loops)
+    {
+        try
+        {
+            if (hub is null || hub.State != HubConnectionState.Connected)
+            {
+                Logger.LogTrace("Hub not connected, unable to send session update");
+                return false;
+            }
+
+            await hub.SendAsync("SendLoopChange", eventId, loops, stoppingToken);
+            MessagesSent++;
+            WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send session update");
+            return false;
+        }
+        return true;
+    }
+
+    public async Task<bool> SendPassingsAsync(int eventId, List<Passing> passings)
+    {
+        try
+        {
+            if (hub is null || hub.State != HubConnectionState.Connected)
+            {
+                Logger.LogTrace("Hub not connected, unable to send passings");
+                return false;
+            }
+
+            await hub.SendAsync("SendPassings", eventId, passings, stoppingToken);
+            MessagesSent++;
+            WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send passings");
+            return false;
+        }
+        return true;
     }
 }

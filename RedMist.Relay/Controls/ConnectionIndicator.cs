@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls.Primitives;
-using RedMist.Relay.Models;
+using RedMist.Relay.Common;
 
 namespace RedMist.Relay.Controls;
 

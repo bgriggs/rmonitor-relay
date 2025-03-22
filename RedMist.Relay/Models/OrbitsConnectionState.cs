@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using RedMist.Relay.Common;
 
 namespace RedMist.Relay.Models;
 

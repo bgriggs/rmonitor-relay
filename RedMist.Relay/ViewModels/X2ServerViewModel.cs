@@ -1,4 +1,5 @@
-﻿using BigMission.Shared.Utilities;
+﻿using Avalonia.Threading;
+using BigMission.Shared.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DialogHostAvalonia;
@@ -8,6 +9,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
+using RedMist.Relay.Common;
 using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
@@ -16,9 +18,11 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class X2ServerViewModel : ObservableValidator
+public partial class X2ServerViewModel : ObservableValidator, IRecipient<X2MessageStatistic>, IRecipient<X2ConnectionState>
 {
     private ILogger Logger { get; }
+
+    public bool IsSdkEnabled => x2Client.GetType() != typeof(NullX2Client);
 
     [ObservableProperty]
     private int x2MessagesReceived;
@@ -29,17 +33,20 @@ public partial class X2ServerViewModel : ObservableValidator
     [ObservableProperty]
     private ConnectionState x2ConnectionState = ConnectionState.Disconnected;
 
-    private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
+    private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(200));
     private readonly OrganizationConfigurationService configurationService;
     private readonly IConfiguration configuration;
+    private readonly IX2Client x2Client;
 
 
-    public X2ServerViewModel(OrganizationConfigurationService configurationService, ILoggerFactory loggerFactory, IConfiguration configuration)
+    public X2ServerViewModel(OrganizationConfigurationService configurationService, ILoggerFactory loggerFactory, 
+        IConfiguration configuration, IX2Client x2Client)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         WeakReferenceMessenger.Default.RegisterAll(this);
         this.configurationService = configurationService;
         this.configuration = configuration;
+        this.x2Client = x2Client;
     }
 
 
@@ -66,7 +73,7 @@ public partial class X2ServerViewModel : ObservableValidator
                     config.Password = encrypt.Encrypt(config.Password);
                     organization.X2 = config;
                     await configurationService.SaveConfiguration(organization);
-                    Logger.LogInformation("Orbits configuration updated.");
+                    Logger.LogInformation("X2 configuration updated.");
                 }
             }
             else
@@ -87,5 +94,34 @@ public partial class X2ServerViewModel : ObservableValidator
             });
             await box.ShowAsync();
         }
+    }
+
+    /// <summary>
+    /// The connection the X2 server changed.
+    /// </summary>
+    public void Receive(X2ConnectionState message)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            X2ConnectionState = message.State;
+            X2ConnectionStr = message.State.ToString();
+        }, DispatcherPriority.Background);
+    }
+
+
+    /// <summary>
+    /// Update the messages received from the X2 server.
+    /// </summary>
+    /// <param name="message"></param>
+    public void Receive(X2MessageStatistic message)
+    {
+        _ = debouncer.ExecuteAsync(() =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                X2MessagesReceived = message.MessagesReceived;
+            }, DispatcherPriority.Background);
+            return Task.CompletedTask;
+        });
     }
 }

@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedMist.TimingCommon", "red
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{C0889C5C-0881-4734-851B-91E2D41357DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedMist.Relay.Common", "RedMist.Relay.Common\RedMist.Relay.Common.csproj", "{68DABE15-BA56-48DD-8B1D-6C5179ECC31B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{0E3292A9-D018-8A12-0037-2B5F75C52CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E3292A9-D018-8A12-0037-2B5F75C52CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E3292A9-D018-8A12-0037-2B5F75C52CFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68DABE15-BA56-48DD-8B1D-6C5179ECC31B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68DABE15-BA56-48DD-8B1D-6C5179ECC31B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68DABE15-BA56-48DD-8B1D-6C5179ECC31B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68DABE15-BA56-48DD-8B1D-6C5179ECC31B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

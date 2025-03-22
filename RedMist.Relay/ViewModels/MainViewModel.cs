@@ -2,18 +2,18 @@
 using LogViewer.Core.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RedMist.Relay.Common;
 using RedMist.Relay.Services;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
 public partial class MainViewModel : ObservableValidator
 {
-    private readonly Services.RelayService relay;
+    private readonly RelayService relay;
 
     public LogViewerControlViewModel LogViewer { get; }
 
@@ -29,14 +29,14 @@ public partial class MainViewModel : ObservableValidator
 
     public MainViewModel(ISettingsProvider settings, RelayService relay, LogViewerControlViewModel logViewer, IConfiguration configuration,
         OrganizationClient organizationClient, EventManagementClient eventManagementClient, ILoggerFactory loggerFactory, 
-        OrganizationConfigurationService configurationService, EventService eventService)
+        OrganizationConfigurationService configurationService, EventService eventService, IX2Client x2Client)
     {
         this.relay = relay;
         LogViewer = logViewer;
 
         Organization = new OrganizationViewModel(configurationService, settings, loggerFactory);
         Orbits = new OrbitsViewModel(loggerFactory, configurationService);
-        X2Server = new X2ServerViewModel(configurationService, loggerFactory, configuration);
+        X2Server = new X2ServerViewModel(configurationService, loggerFactory, configuration, x2Client);
         ControlLog = new ControlLogViewModel(loggerFactory, configurationService, organizationClient);
         Event = new EventViewModel(eventService, loggerFactory);
 
