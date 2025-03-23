@@ -13,10 +13,13 @@ using Microsoft.Extensions.Logging;
 using MsLogger.Core;
 using RedMist.Relay.Common;
 using RedMist.Relay.Services;
+using RedMist.Relay.Services.X2Test;
 using RedMist.Relay.ViewModels;
 using RedMist.Relay.Views;
+using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 
@@ -45,6 +48,20 @@ public partial class App : Application
 
         var builder = Host.CreateApplicationBuilder();
         builder.AddLogViewer().Logging.AddDefaultDataStoreLogger();
+
+        // Manually resolve dependency assembly references from the same directory as the main assembly
+        // since the MyLaps SDK is not loading the required DLLs from the same directory, i.e. SDKWrapper.dll
+        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+        {
+            var assemblyName = new AssemblyName(args.Name).Name + ".dll";
+            var assemblyPath = Path.Combine(AppContext.BaseDirectory, assemblyName);
+
+            if (File.Exists(assemblyPath))
+            {
+                return Assembly.LoadFrom(assemblyPath);
+            }
+            return null; // Let the default resolution process continue
+        };
 
         var services = builder.Services;
         ConfigureServices(services);
@@ -102,12 +119,22 @@ public partial class App : Application
     [Singleton(typeof(EditEventDialog))]
     internal static partial void ConfigureViews(IServiceCollection services);
 
+    /// <summary>
+    /// MyLaps code cannot be included so load dlls dynamically.
+    /// </summary>
     private void ConfigureDynamicServices(IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         var logger = loggerFactory.CreateLogger(GetType().Name);
+        
+        if (bool.Parse(configuration["X2Test"] ?? "false"))
+        {
+            services.AddSingleton<IX2Client, X2TestClient>();
+            return;
+        }
+
         var x2Path = configuration["X2DllPath"];
         if (File.Exists(x2Path))
         {

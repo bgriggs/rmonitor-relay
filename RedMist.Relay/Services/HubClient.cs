@@ -105,7 +105,7 @@ public class HubClient : HubClientBase
         return true;
     }
 
-    public async Task<bool> SendPassingsAsync(int eventId, List<Passing> passings)
+    public async Task<bool> SendPassingsAsync(int eventId, int sessionId, List<Passing> passings)
     {
         try
         {
@@ -115,7 +115,7 @@ public class HubClient : HubClientBase
                 return false;
             }
 
-            await hub.SendAsync("SendPassings", eventId, passings, stoppingToken);
+            await hub.SendAsync("SendPassings", eventId, sessionId, passings, stoppingToken);
             MessagesSent++;
             WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
         }

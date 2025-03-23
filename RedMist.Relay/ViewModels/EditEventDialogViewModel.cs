@@ -1,5 +1,4 @@
-﻿using Avalonia.Utilities;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DialogHostAvalonia;
 using MsBox.Avalonia;
@@ -7,6 +6,7 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using RedMist.TimingCommon.Models.Configuration;
+using RedMist.TimingCommon.Models.X2;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -110,13 +110,20 @@ public partial class EditEventDialogViewModel : ObservableValidator
     #endregion
 
     #region Schedule
-
+    
     public ObservableCollection<DayScheduleViewModel> Schedule { get; } = [];
+
+    #endregion
+
+    #region X2
+
+    public ObservableCollection<X2LoopViewModel> Loops { get; } = [];
 
     #endregion
 
     public bool AllowDelete => Model.Id > 0;
 
+    
 
     public EditEventDialogViewModel(Event model)
     {
@@ -127,9 +134,9 @@ public partial class EditEventDialogViewModel : ObservableValidator
 
     public async Task Save()
     {
-        if (HasErrors)
+        var errors = GetAllErrors();
+        if (errors.Any())
         {
-            var errors = GetErrors();
             var sb = new StringBuilder();
             foreach (var e in errors)
             {
@@ -149,8 +156,44 @@ public partial class EditEventDialogViewModel : ObservableValidator
         else
         {
             Model.Schedule.Entries = [.. Schedule.SelectMany(e => e.EntryViewModels.Select(s => s.Model))];
+            Model.LoopsMetadata = [.. Loops.Select(l => l.LoopMetadata)];
             DialogHost.Close("MainDialogHost", Model);
         }
+    }
+
+    private IEnumerable<ValidationResult> GetAllErrors()
+    {
+        List<ValidationResult> errors = [];
+        var eventVmErrors = GetErrors();
+        if (eventVmErrors.Any())
+        {
+            errors.AddRange(eventVmErrors);
+        }
+
+        // Validate Schedule
+        foreach (var day in Schedule)
+        {
+            foreach (var entry in day.EntryViewModels)
+            {
+                var entryErrors = entry.GetErrors();
+                if (entryErrors.Any())
+                {
+                    errors.AddRange(entryErrors);
+                }
+            }
+        }
+
+        // Validate Loops
+        foreach (var loop in Loops)
+        {
+            var loopErrors = loop.GetErrors();
+            if (loopErrors.Any())
+            {
+                errors.AddRange(loopErrors);
+            }
+        }
+
+        return errors;
     }
 
     public async Task Delete()
@@ -207,6 +250,26 @@ public partial class EditEventDialogViewModel : ObservableValidator
         else
         {
             // Log when the schedule is too long
+        }
+    }
+
+    public void InitializeLoops(List<Loop> loops)
+    {
+        foreach (var loop in loops.OrderBy(l => l.Order))
+        {
+            var metadata = Model.LoopsMetadata.FirstOrDefault(x => x.Id == loop.Id);
+            if (metadata == null)
+            {
+                metadata = new LoopMetadata { Id = loop.Id, Type = LoopType.Other, Name = loop.Name, EventId = Model.Id };
+                Model.LoopsMetadata.Add(metadata);
+            }
+
+            var vm = new X2LoopViewModel(metadata)
+            {
+                Id = loop.Id,
+                X2Name = loop.Name,
+            };
+            Loops.Add(vm);
         }
     }
 }
@@ -351,4 +414,71 @@ public partial class DayScheduleEntryViewModel : ObservableValidator
 public class DeleteScheduleDayEntryCommand(DayScheduleEntryViewModel vm)
 {
     public DayScheduleEntryViewModel Vm { get; } = vm;
+}
+
+public partial class X2LoopViewModel : ObservableValidator
+{
+    public LoopMetadata LoopMetadata { get; private set; }
+    public uint Id { get; set; }
+    public string X2Name { get; set; } = string.Empty;
+
+    public static LoopTypeViewModel[] LoopTypes
+    {
+        get
+        {
+            return [new LoopTypeViewModel(LoopType.StartFinish, "Start / Finish"),
+                    new LoopTypeViewModel(LoopType.PitIn, "Pit Entrance"),
+                    new LoopTypeViewModel(LoopType.PitStartFinish, "Pit Start / Finish"),
+                    new LoopTypeViewModel(LoopType.PitExit, "Pit Exit"),
+                    new LoopTypeViewModel(LoopType.PitOther, "Pit (other)"),
+                    new LoopTypeViewModel(LoopType.Other, "Other / Sector"),];
+        }
+    }
+
+    //private LoopTypeViewModel selectedLoopType;
+    //public LoopTypeViewModel SelectedLoopType
+    //{
+    //    get => selectedLoopType;
+    //    set
+    //    {
+    //        if (SetProperty(ref selectedLoopType, value))
+    //        {
+    //            loopMetadata.Type = value.Type;
+    //        }
+    //    }
+    //}
+
+    public int index;
+    public int SelectedIndex
+    {
+        get { return index; }
+        set
+        {
+            if (SetProperty(ref index, value))
+            {
+                LoopMetadata.Type = (LoopType)value;
+            }
+        }
+    }
+
+    public string TypeName => LoopTypes[index].Name;
+
+    [StringLength(14)]
+    public string Name
+    {
+        get => LoopMetadata.Name;
+        set => SetProperty(LoopMetadata.Name, value, LoopMetadata, (u, n) => u.Name = n, validate: true);
+    }
+
+    public X2LoopViewModel(LoopMetadata loopMetadata)
+    {
+        LoopMetadata = loopMetadata;
+        index = (int)loopMetadata.Type;
+    }
+}
+
+public class LoopTypeViewModel(LoopType type, string name)
+{
+    public LoopType Type { get; set; } = type;
+    public string Name { get; } = name;
 }

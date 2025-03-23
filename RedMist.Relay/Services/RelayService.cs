@@ -210,7 +210,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
             {
                 try
                 {
-                    if (x2Client?.ConnectionState == ConnectionState.Disconnected)
+                    if (x2Client != null && x2Client.ConnectionState == ConnectionState.Disconnected)
                     {
                         var config = x2Configuration;
                         if (config != null)
@@ -219,8 +219,8 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
                             var encryption = new EncryptionService(key, Consts.IV);
                             var password = encryption.Decrypt(config.Password);
 
-                            bool? result = x2Client?.Connect(config.Server, config.Username, password);
-                            if (result is not true)
+                            x2Client.Connect(config.Server, config.Username, password);
+                            if (x2Client.ConnectionState != ConnectionState.Connected)
                             {
                                 Logger.LogWarning("Failed to connect to X2 server. Retrying in 10 seconds.");
                                 await Task.Delay(TimeSpan.FromSeconds(7));
@@ -251,6 +251,11 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         {
             if (eventService.Event != null)
             {
+                foreach (var loop in message.Loops)
+                {
+                    loop.EventId = eventService.Event.Id;
+                }
+
                 await hubClient.SendLoopsAsync(eventService.Event.Id, message.Loops);
             }
         });
@@ -265,7 +270,12 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         {
             if (eventService.Event != null)
             {
-                bool result = await hubClient.SendPassingsAsync(eventService.Event.Id, message.Passings);
+                foreach (var passing in message.Passings)
+                {
+                    passing.EventId = eventService.Event.Id;
+                }
+
+                bool result = await hubClient.SendPassingsAsync(eventService.Event.Id, eventDataCache.SessionNumber, message.Passings);
                 if (!result)
                 {
                     eventDataCache.UpdatePassings(message.Passings);
@@ -279,7 +289,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         var passings = eventDataCache.GetPassingsWithClear();
         if (passings.Count != 0 && eventService.Event != null)
         {
-            await hubClient.SendPassingsAsync(eventService.Event.Id, passings);
+            await hubClient.SendPassingsAsync(eventService.Event.Id, eventDataCache.SessionNumber, passings);
         }
     }
 

@@ -82,5 +82,22 @@
 				</ItemsRepeater>
 			</StackPanel>
 		</Border>
+		<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Margin="3"
+				BorderBrush="{actipro:ThemeResource Container2BorderBrush}" IsVisible="{Binding IsSchedule}"
+				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
+			<StackPanel>
+				<TextBlock Classes="theme-text-heading size-xs" Text="X2 Loops"/>
+				<ItemsRepeater ItemsSource="{Binding X2Loops}">
+					<ItemsRepeater.ItemTemplate>
+						<DataTemplate DataType="vm:X2LoopViewModel">
+							<StackPanel Orientation="Horizontal">
+								<TextBlock Text="{Binding TypeName}" Margin="3,1,10,1" Classes="theme-text-body size-sm"/>
+								<TextBlock Text="{Binding Name}" Margin="3,1" Classes="theme-text-body size-sm"/>
+							</StackPanel>
+						</DataTemplate>
+					</ItemsRepeater.ItemTemplate>
+				</ItemsRepeater>
+			</StackPanel>
+		</Border>
 	</StackPanel>
 </UserControl>

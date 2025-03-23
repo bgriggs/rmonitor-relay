@@ -16,6 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/bgriggs/rmonitor-relay</RepositoryUrl>
 		<UserSecretsId>a0933669-5513-48fc-a263-a2fbd41cfb72</UserSecretsId>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>

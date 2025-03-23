@@ -6,7 +6,7 @@
 			 xmlns:dialog="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
 			 xmlns:vm="clr-namespace:RedMist.Relay.ViewModels"
 			 xmlns:design="clr-namespace:RedMist.Relay.ViewModels.Design"
-             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="500"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="400"
              x:Class="RedMist.Relay.Views.EditEventDialog"
 			 x:DataType="vm:EditEventDialogViewModel">
 	<Design.DataContext>
@@ -68,12 +68,44 @@
 					</ItemsRepeater>
 				</Expander>
 
+				<!--Broadcast-->
 				<Expander Header="Broadcast" Margin="1,3">
 					<StackPanel>
 						<TextBox Text="{Binding BroadcastCompanyName}" Watermark="Company Name" Margin="1,1,1,1"/>
 						<TextBlock Text="Ex: Driver's Eye" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
 						<TextBox Text="{Binding BroadcastUrl}" Watermark="Broadcast URL" Margin="1,1,1,1"/>
 						<TextBlock Text="Ex: https://www.youtube.com/@Racewrl_Go" Classes="theme-text-body size-xs" Margin="10,1,1,1"/>
+					</StackPanel>
+				</Expander>
+
+				<!--Loops-->
+				<Expander Header="Loops" Margin="1,3" IsExpanded="True">
+					<StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="ID" Classes="theme-text-heading size-xs" Width="80"/>
+							<TextBlock Text="X2 Name" Classes="theme-text-heading size-xs" Width="80"/>
+							<TextBlock Text="Type" Classes="theme-text-heading size-xs" Width="140"/>
+							<TextBlock Text="Display Name" Classes="theme-text-heading size-xs" Width="80"/>
+						</StackPanel>
+						<ItemsRepeater ItemsSource="{Binding Loops}">
+							<ItemsRepeater.ItemTemplate>
+								<DataTemplate DataType="vm:X2LoopViewModel">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding Id}" Width="80" VerticalAlignment="Center"/>
+										<TextBlock Text="{Binding X2Name}" Width="80" VerticalAlignment="Center"/>
+										<ComboBox ItemsSource="{Binding LoopTypes}" SelectedIndex="{Binding SelectedIndex}"
+												  Width="140">
+											<ComboBox.ItemTemplate>
+												<DataTemplate DataType="vm:LoopTypeViewModel">
+													<TextBlock Text="{Binding Name}"/>
+												</DataTemplate>
+											</ComboBox.ItemTemplate>
+										</ComboBox>
+										<TextBox Text="{Binding Name}" Width="100"/>
+									</StackPanel>
+								</DataTemplate>
+							</ItemsRepeater.ItemTemplate>
+						</ItemsRepeater>
 					</StackPanel>
 				</Expander>
 			</StackPanel>

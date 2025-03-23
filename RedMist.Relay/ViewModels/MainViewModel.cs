@@ -38,7 +38,7 @@ public partial class MainViewModel : ObservableValidator
         Orbits = new OrbitsViewModel(loggerFactory, configurationService);
         X2Server = new X2ServerViewModel(configurationService, loggerFactory, configuration, x2Client);
         ControlLog = new ControlLogViewModel(loggerFactory, configurationService, organizationClient);
-        Event = new EventViewModel(eventService, loggerFactory);
+        Event = new EventViewModel(eventService, loggerFactory, x2Client);
 
         relay.SetLocalMessageLogging(EnableLogMessages ?? false);
     }

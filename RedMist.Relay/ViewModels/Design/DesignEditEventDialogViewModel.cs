@@ -1,5 +1,7 @@
 ﻿using RedMist.TimingCommon.Models.Configuration;
+using RedMist.TimingCommon.Models.X2;
 using System;
+using System.Collections.Generic;
 
 namespace RedMist.Relay.ViewModels.Design;
 
@@ -28,8 +30,20 @@ public class DesignEditEventDialogViewModel : EditEventDialogViewModel
                     new EventScheduleEntry { Name = "Entry 1", DayOfEvent = DateTime.Now.AddDays(-1), StartTime = new DateTime(1, 3, 9, 9, 0, 0), EndTime = new DateTime(1, 1, 1, 17, 0, 0) },
                     new EventScheduleEntry { Name = "Entry 2", DayOfEvent = DateTime.Now, StartTime = new DateTime(1, 1, 1, 8, 0, 0), EndTime = new DateTime(1, 1, 1, 15, 0, 0) }
                 ]
-            }
+            },
+            LoopsMetadata =
+            [
+                new LoopMetadata { Id = 1, Name = "Loop 1", },
+                new LoopMetadata { Id = 2, Name = "Loop 2", Type = LoopType.PitIn }
+            ]
         };
         Model = eventData;
+
+        var loops = new List<Loop>
+        {
+            new() { Id = 1, Name = "Loop 1", },
+            new() { Id = 2, Name = "Loop 2", IsInPit = true }
+        };
+        InitializeLoops(loops);
     }
 }

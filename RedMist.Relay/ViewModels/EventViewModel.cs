@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using DialogHostAvalonia;
@@ -6,9 +7,12 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using RedMist.Relay.Common;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
+using RedMist.TimingCommon.Models.X2;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
@@ -20,7 +24,7 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
 {
     private ILogger Logger { get; }
     private readonly EventService eventService;
-
+    private readonly IX2Client x2Client;
     private readonly ObservableCollection<EventSummary> eventSummaries = [];
     public ObservableCollection<EventSummary> EventSummaries => eventSummaries;
 
@@ -64,14 +68,16 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
     public bool IsBroadcastUrlEnabled => !string.IsNullOrEmpty(EventData?.Broadcast?.Url);
     public bool IsSchedule => EventData?.Schedule?.Entries?.Count > 0;
     public ObservableCollection<DayScheduleViewModel> Schedule { get; } = [];
+    public ObservableCollection<X2LoopViewModel> X2Loops { get; } = [];
 
     private bool isInitialized = false;
 
 
-    public EventViewModel(EventService eventService, ILoggerFactory loggerFactory)
+    public EventViewModel(EventService eventService, ILoggerFactory loggerFactory, IX2Client x2Client)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         this.eventService = eventService;
+        this.x2Client = x2Client;
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
@@ -107,12 +113,14 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             try
             {
                 EventData = await eventService.UpdateEventActiveAndLoadAsync(eventId.Value);
-                RefreshSchedule();
+                Dispatcher.UIThread.Post(RefreshSchedule);
+                Dispatcher.UIThread.Post(RefreshX2Loops);
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Failed to update active event.");
-                MessageBoxManager.GetMessageBoxStandard("Error", "Failed to update active event.", ButtonEnum.Ok, Icon.Error);
+                Dispatcher.UIThread.Post(() =>
+                    MessageBoxManager.GetMessageBoxStandard("Error", "Failed to update active event.", ButtonEnum.Ok, Icon.Error));
             }
         }
     }
@@ -123,6 +131,18 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
         if (EventData != null)
         {
             EditEventDialogViewModel.InitializeSchedule(EventData.Schedule.Entries, Schedule, EventData.StartDate, EventData.EndDate);
+        }
+    }
+
+    private void RefreshX2Loops()
+    {
+        X2Loops.Clear();
+        if (EventData != null)
+        {
+            foreach (var loop in EventData.LoopsMetadata)
+            {
+                X2Loops.Add(new X2LoopViewModel(loop));
+            }
         }
     }
 
@@ -138,6 +158,12 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
         var clone = JsonSerializer.Deserialize<Event>(cloneJson)!;
 
         var vm = new EditEventDialogViewModel(clone);
+        var loops = TryGetX2Loops();
+        if (loops.Count > 0)
+        {
+            vm.InitializeLoops(loops);
+        }
+
         var result = await DialogHost.Show(vm, "MainDialogHost");
         if (result is Event updatedEvent)
         {
@@ -145,6 +171,7 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             {
                 EventData = updatedEvent;
                 RefreshSchedule();
+                RefreshX2Loops();
                 await eventService.UpdateEventAsync(updatedEvent);
             }
             catch (Exception ex)
@@ -168,6 +195,12 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
             EndDate = DateTime.Now.AddDays(1)
         };
         var vm = new EditEventDialogViewModel(@event);
+        var loops = TryGetX2Loops();
+        if (loops.Count > 0)
+        {
+            vm.InitializeLoops(loops);
+        }
+
         var result = await DialogHost.Show(vm, "MainDialogHost");
         if (result is Event updatedEvent)
         {
@@ -184,6 +217,19 @@ public partial class EventViewModel : ObservableValidator, IRecipient<ValueChang
                 Logger.LogError(ex, "Failed to save new event.");
                 MessageBoxManager.GetMessageBoxStandard("Error", "Failed to save new event.", ButtonEnum.Ok, Icon.Error);
             }
+        }
+    }
+
+    private List<Loop> TryGetX2Loops()
+    {
+        try
+        {
+            return x2Client.GetLoops() ?? [];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to get X2 loops.");
+            return [];
         }
     }
 

@@ -16,7 +16,7 @@ public class DesignX2Client : IX2Client
 
     public List<Loop>? GetLoops()
     {
-        return [];
+        return [new Loop { Id = 123123, Name = "Start/Finish" }];
     }
 
     public void ResendPassings(DateTime start, DateTime? end)
