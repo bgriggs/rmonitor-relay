@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class ControlLogViewModel : ObservableValidator
+public partial class ControlLogViewModel : ObservableValidator, IRecipient<OrganizationConfigurationChanged>
 {
     private ILogger Logger { get; }
 
@@ -46,6 +46,7 @@ public partial class ControlLogViewModel : ObservableValidator
     public void Initialize()
     {
         checkUpdateControlLogStatisticsSubscription ??= Observable.Interval(TimeSpan.FromSeconds(60)).Subscribe(async _ => { await CheckUpdateControlLogStatistics(); });
+        
     }
 
     private async Task CheckUpdateControlLogStatistics()
@@ -126,5 +127,10 @@ public partial class ControlLogViewModel : ObservableValidator
             });
             await box.ShowAsync();
         }
+    }
+
+    public void Receive(OrganizationConfigurationChanged message)
+    {
+        _ = CheckUpdateControlLogStatistics();
     }
 }

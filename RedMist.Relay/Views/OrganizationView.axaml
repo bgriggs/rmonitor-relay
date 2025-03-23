@@ -22,7 +22,10 @@
 				<Image Source="{StaticResource editicon}" Width="20" Height="16" Margin="0,0,0,0"/>
 			</Button>
 		</Grid>
-		<TextBlock Text="{Binding OrgName}" Classes="theme-text-heading size-xs" Margin="3,0,0,0"/>
+		<StackPanel Orientation="Horizontal">
+			<Image Source="{Binding OrganizationLogo}" Height="55" Width="55" VerticalAlignment="Center" IsVisible="{Binding HasOrganizationLogo}"/>
+			<TextBlock Text="{Binding OrgName}" Classes="theme-text-heading size-xs" Margin="3,0,0,0" VerticalAlignment="Center"/>
+		</StackPanel>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Text="{Binding HubConnectionStr, StringFormat='Status: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="6,0,0,0"/>
 			<TextBlock Text="{Binding MessagesSentToHub, StringFormat='Messages Sent: {0}'}" Classes="theme-text-body size-xs" VerticalAlignment="Center" Margin="16,0,0,0"/>

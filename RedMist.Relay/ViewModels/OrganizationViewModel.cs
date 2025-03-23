@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using BigMission.Shared.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -14,7 +15,9 @@ using RedMist.Relay.Common;
 using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
+using RedMist.TimingCommon.Models.X2;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
@@ -27,6 +30,8 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
     private ILogger Logger { get; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OrganizationLogo))]
+    [NotifyPropertyChangedFor(nameof(HasOrganizationLogo))]
     private string orgName = string.Empty;
 
     [ObservableProperty]
@@ -37,6 +42,22 @@ public partial class OrganizationViewModel : ObservableValidator, IRecipient<Hub
 
     [ObservableProperty]
     private ConnectionState hubConnectionState = ConnectionState.Disconnected;
+
+    public Bitmap? OrganizationLogo
+    {
+        get
+        {
+            var logo = configurationService.OrganizationConfiguration?.Logo;
+            if (logo is not null)
+            {
+                using MemoryStream ms = new(logo);
+                return Bitmap.DecodeToWidth(ms, 55);
+            }
+            return null;
+        }
+    }
+
+    public bool HasOrganizationLogo => OrganizationLogo != null;
 
     private readonly Debouncer debouncer = new(TimeSpan.FromMilliseconds(500));
 
