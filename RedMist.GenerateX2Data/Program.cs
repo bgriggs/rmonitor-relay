@@ -38,10 +38,10 @@ internal class Program
                 lastTime = lastTime.AddSeconds(10);
                 passingId++;
 
-                if (runs % 10 == 0 && pitRemaining.Contains(tp))
+                if (pitRemaining.Contains(tp))
                 {
                     passings.Add(new Passing { Id = passingId, LoopId = 2, TransponderId = tp, TimestampLocal = lastTime, TimestampUtc = lastTime.ToUniversalTime(), Hits = 1, IsInPit = true });
-                    lastTime = lastTime.AddSeconds(15);
+                    lastTime = lastTime.AddSeconds(25);
                     passingId++;
 
                     passings.Add(new Passing { Id = passingId, LoopId = 3, TransponderId = tp, TimestampLocal = lastTime, TimestampUtc = lastTime.ToUniversalTime(), Hits = 1, IsInPit = true });
@@ -49,7 +49,7 @@ internal class Program
                     passingId++;
 
                     passings.Add(new Passing { Id = passingId, LoopId = 4, TransponderId = tp, TimestampLocal = lastTime, TimestampUtc = lastTime.ToUniversalTime(), Hits = 1, IsInPit = false });
-                    lastTime = lastTime.AddSeconds(10);
+                    lastTime = lastTime.AddSeconds(20);
                     passingId++;
 
                     pitRemaining.Remove(tp);

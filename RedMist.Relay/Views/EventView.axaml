@@ -83,7 +83,7 @@
 			</StackPanel>
 		</Border>
 		<Border BorderThickness="1" Background="{actipro:ThemeResource Container3BackgroundBrush}" Margin="3"
-				BorderBrush="{actipro:ThemeResource Container2BorderBrush}" IsVisible="{Binding IsSchedule}"
+				BorderBrush="{actipro:ThemeResource Container2BorderBrush}"
 				CornerRadius="{actipro:ScaledCornerRadius 1.5}"	Padding="{actipro:ScaledThickness 0.5}">
 			<StackPanel>
 				<TextBlock Classes="theme-text-heading size-xs" Text="X2 Loops"/>

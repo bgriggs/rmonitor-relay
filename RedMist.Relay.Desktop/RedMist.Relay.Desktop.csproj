@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Title>Result Monitor Relay</Title>
+		<Title>Red Mist Relay</Title>
 		<Authors>Brian Griggs</Authors>
 		<Company></Company>
 		<Description></Description>

@@ -12,7 +12,7 @@ internal class X2TestClient : IX2Client
 {
     const string LoopsPath = "Services/X2Test/Loops.json";
     const string PassingsPath = "Services/X2Test/Passings.json";
-    const double REPLAY_SPEED = 3.0;
+    const double REPLAY_SPEED = 10.0;
     public int MessagesSent { get; private set; }
 
     private readonly List<(DateTime Timestamp, Passing data)> passings = [];
@@ -71,8 +71,8 @@ internal class X2TestClient : IX2Client
                 var duration = (int)(delay.TotalMilliseconds / REPLAY_SPEED);
                 if (duration < 0)
                     duration = 0;
-                else if (duration > 10000)
-                    duration = 10000;
+                //else if (duration > 10000)
+                //    duration = 10000;
                 System.Threading.Thread.Sleep(duration);
             }
             lastTimestamp = passing.TimestampLocal;

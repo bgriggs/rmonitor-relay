@@ -428,8 +428,8 @@ public partial class X2LoopViewModel : ObservableValidator
         {
             return [new LoopTypeViewModel(LoopType.StartFinish, "Start / Finish"),
                     new LoopTypeViewModel(LoopType.PitIn, "Pit Entrance"),
-                    new LoopTypeViewModel(LoopType.PitStartFinish, "Pit Start / Finish"),
                     new LoopTypeViewModel(LoopType.PitExit, "Pit Exit"),
+                    new LoopTypeViewModel(LoopType.PitStartFinish, "Pit Start / Finish"),
                     new LoopTypeViewModel(LoopType.PitOther, "Pit (other)"),
                     new LoopTypeViewModel(LoopType.Other, "Other / Sector"),];
         }
