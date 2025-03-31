@@ -63,6 +63,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         hubClient.ConnectionStatusChanged += async (state) => await OnHubConnectionChanged(state);
 
         eventDataCache.SessionChanged += async (e) => await hubClient.SendSessionChangeAsync(eventService.Event?.Id ?? 0, e.sessionId, e.name);
+        eventDataCache.FlagsChanged += async (e) => await SendCachedFlagsAsync();
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
@@ -95,6 +96,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
         {
             await SendCachedMessagesAsync();
             await SendCachedPassingsAsync();
+            await SendCachedFlagsAsync();
         }
     }
 
@@ -190,6 +192,22 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
 
             var cs = lastRmonitorConnected ? ConnectionState.Connected : ConnectionState.Disconnected;
             WeakReferenceMessenger.Default.Send(new OrbitsConnectionState(cs));
+        }
+    }
+
+    private async Task SendCachedFlagsAsync()
+    {
+        try
+        {
+            var flags = await eventDataCache.GetFlagsAsync();
+            if (flags.Count != 0 && eventService.Event != null)
+            {
+                await hubClient.SendFlagsAsync(eventService.Event.Id, eventDataCache.SessionNumber, flags);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send flags to hub");
         }
     }
 

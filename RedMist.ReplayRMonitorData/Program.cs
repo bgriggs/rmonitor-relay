@@ -8,7 +8,7 @@ internal class Program
 {
     //const string TEST_FILE = "ec-test-data.txt";
     const string TEST_FILE = "barber2025.txt";
-    const double REPLAY_SPEED = 5.0;
+    const double REPLAY_SPEED = 3.0;
 
     static void Main(string[] args)
     {
@@ -24,13 +24,7 @@ internal class Program
         socket.Listen(10);
         while (true)
         {
-
             Console.WriteLine("Waiting connection ... ");
-
-            // Suspend while waiting for
-            // incoming connection Using 
-            // Accept() method the server 
-            // will accept connection of client
             Socket clientSocket = socket.Accept();
 
             try

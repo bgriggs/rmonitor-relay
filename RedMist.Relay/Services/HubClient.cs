@@ -126,4 +126,26 @@ public class HubClient : HubClientBase
         }
         return true;
     }
+
+    public async Task<bool> SendFlagsAsync(int eventId, int sessionId, List<FlagDuration> flags)
+    {
+        try
+        {
+            if (hub is null || hub.State != HubConnectionState.Connected)
+            {
+                Logger.LogTrace("Hub not connected, unable to send passings");
+                return false;
+            }
+
+            await hub.SendAsync("SendFlags", eventId, sessionId, flags, stoppingToken);
+            MessagesSent++;
+            WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send passings");
+            return false;
+        }
+        return true;
+    }
 }

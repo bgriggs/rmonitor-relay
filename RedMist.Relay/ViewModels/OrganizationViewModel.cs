@@ -15,7 +15,6 @@ using RedMist.Relay.Common;
 using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
-using RedMist.TimingCommon.Models.X2;
 using System;
 using System.IO;
 using System.Threading.Tasks;

@@ -1,6 +1,8 @@
-﻿using RedMist.TimingCommon.Models.X2;
+﻿using RedMist.TimingCommon.Models;
+using RedMist.TimingCommon.Models.X2;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,8 +10,12 @@ using System.Threading.Tasks;
 
 namespace RedMist.Relay.Services;
 
+/// <summary>
+/// In-memory event data used when reconnecting to the cloud servers.
+/// </summary>
 public class EventDataCache
 {
+    private readonly SemaphoreSlim semaphore = new(1, 1);
     private readonly Dictionary<string, string> a = [];
     private readonly Dictionary<string, string> comp = [];
     private string b = string.Empty;
@@ -17,7 +23,6 @@ public class EventDataCache
     private readonly Dictionary<string, string> g = [];
     private readonly Dictionary<string, string> gStarting = [];
     private readonly Dictionary<string, string> h = [];
-    private readonly SemaphoreSlim semaphore = new(1, 1);
 
     /// <summary>
     /// ID from $B message.
@@ -25,8 +30,18 @@ public class EventDataCache
     public int SessionNumber { get; set; }
     public string SessionName { get; set; } = string.Empty;
     public event Action<(int sessionId, string name)>? SessionChanged;
+    public event Action<(int sessionId, List<FlagDuration> flags)>? FlagsChanged;
 
     private readonly Dictionary<uint, Passing> passings = [];
+    private readonly List<FlagDuration> flags = [];
+    private Flags lastFlag = Flags.Unknown;
+
+
+    public EventDataCache()
+    {
+        SessionChanged += (s) => passings.Clear();
+        SessionChanged += (s) => flags.Clear();
+    }
 
 
     public async Task UpdateRMonitor(string data)
@@ -34,7 +49,7 @@ public class EventDataCache
         await semaphore.WaitAsync();
         try
         {
-            var parts = data.Split('\n');
+            var parts = data.Split('\n', StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in parts)
             {
                 var msgParts = ParseRMonitor(p);
@@ -57,12 +72,16 @@ public class EventDataCache
                 else if (cmd == "$B")
                 {
                     b = p;
+                    var lastSessionNum = SessionNumber;
                     if (int.TryParse(msgParts[1], out int en))
                     {
                         SessionNumber = en;
                     }
                     SessionName = msgParts[2];
-                    SessionChanged?.Invoke((SessionNumber, SessionName));
+                    if (SessionNumber != lastSessionNum)
+                    {
+                        SessionChanged?.Invoke((SessionNumber, SessionName));
+                    }
                 }
                 // C - Class information
                 else if (cmd == "$C" && msgParts.Length > 1)
@@ -70,10 +89,6 @@ public class EventDataCache
                     var classId = msgParts[1];
                     c[classId] = p;
                 }
-                //// E - Setting information
-                //else if (cmd == "$E")
-                //{
-                //}
                 // G - Race information
                 else if (cmd == "$G" && msgParts.Length > 2)
                 {
@@ -90,6 +105,19 @@ public class EventDataCache
                 {
                     var reg = msgParts[2];
                     h[reg] = p;
+                }
+                // Heartbeat - $F,14,"00:12:45","13:34:23","00:09:47","Green "
+                else if (cmd == "$F" && msgParts.Length > 2)
+                {
+                    if (msgParts.Length != 6)
+                        continue;
+                    var timeStr = msgParts[3].Replace("\"", "").Trim();
+                    var flagStr = msgParts[5].Replace("\"", "").Trim();
+
+                    if (DateTime.TryParseExact(timeStr, "HH:mm:ss", null, DateTimeStyles.None, out var tod))
+                    {
+                        UpdateFlags(flagStr.ToFlag(), tod);
+                    }
                 }
             }
         }
@@ -173,9 +201,55 @@ public class EventDataCache
         }
     }
 
+    #region Flags
+
+    /// <summary>
+    /// Check for changes to flag state.
+    /// </summary>
+    /// <param name="flag"></param>
+    /// <param name="tod">Time of Day</param>
+    private void UpdateFlags(Flags flag, DateTime tod)
+    {
+        if (flag == lastFlag)
+        {
+            return;
+        }
+        lastFlag = flag;
+
+        var flagDuration = new FlagDuration
+        {
+            StartTime = tod,
+            Flag = flag
+        };
+
+        var lastFlagDuration = flags.LastOrDefault();
+        if (lastFlagDuration != null && lastFlagDuration.EndTime == null)
+        {
+            lastFlagDuration.EndTime = tod.AddSeconds(-1);
+        }
+
+        flags.Add(flagDuration);
+        FlagsChanged?.Invoke((SessionNumber, flags.ToList()));
+    }
+
+    public async Task<List<FlagDuration>> GetFlagsAsync()
+    {
+        await semaphore.WaitAsync();
+        try
+        {
+            return [.. flags];
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    #endregion
+
     #region Passings
 
-    public void UpdatePassing(List<Passing> passings)
+    public void UpdatePassings(List<Passing> passings)
     {
         lock (passings)
         {
@@ -195,16 +269,6 @@ public class EventDataCache
             passings.Clear();
             return result;
         }
-    }
-
-    internal void UpdatePassingS(List<Passing> passings)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal void UpdatePassings(List<Passing> passings)
-    {
-        throw new NotImplementedException();
     }
 
     #endregion
