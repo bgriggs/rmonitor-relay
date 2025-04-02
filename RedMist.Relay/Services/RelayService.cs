@@ -9,7 +9,6 @@ using RedMist.Relay.Models;
 using RedMist.TimingCommon.Models.Configuration;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
@@ -21,7 +20,7 @@ namespace RedMist.Relay.Services;
 /// Takes data received from RMonitor and X2 endpoints and sends to the cloud SignalR hub.
 /// </summary>
 public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecipient<EventConfigurationChanged>,
-    IRecipient<X2ReceivedLoop>, IRecipient<X2ReceivedPassing>
+    IRecipient<X2ReceivedLoop>, IRecipient<X2ReceivedPassing>, IRecipient<CompetitorMetadataUpdate>
 {
     private readonly HubClient hubClient;
     private readonly RMonitorClient rMonitorClient;
@@ -44,7 +43,8 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
 
 
     public RelayService(ILoggerFactory loggerFactory, HubClient hubClient, RMonitorClient rMonitorClient,
-        EventDataCache eventDataCache, EventService eventService, IX2Client x2Client, IConfiguration configuration)
+        EventDataCache eventDataCache, EventService eventService, IX2Client x2Client, 
+        IConfiguration configuration)
     {
         Logger = loggerFactory.CreateLogger(GetType().Name);
         this.hubClient = hubClient;
@@ -97,6 +97,7 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
             await SendCachedMessagesAsync();
             await SendCachedPassingsAsync();
             await SendCachedFlagsAsync();
+            await SendCachedCompetitorMetadataAsync();
         }
     }
 
@@ -286,18 +287,25 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
     {
         _ = Task.Run(async () =>
         {
-            if (eventService.Event != null)
+            try
             {
-                foreach (var passing in message.Passings)
+                if (eventService.Event != null)
                 {
-                    passing.EventId = eventService.Event.Id;
-                }
+                    foreach (var passing in message.Passings)
+                    {
+                        passing.EventId = eventService.Event.Id;
+                    }
 
-                bool result = await hubClient.SendPassingsAsync(eventService.Event.Id, eventDataCache.SessionNumber, message.Passings);
-                if (!result)
-                {
-                    eventDataCache.UpdatePassings(message.Passings);
+                    bool result = await hubClient.SendPassingsAsync(eventService.Event.Id, eventDataCache.SessionNumber, message.Passings);
+                    if (!result)
+                    {
+                        eventDataCache.UpdatePassings(message.Passings);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to send X2 data to hub");
             }
         });
     }
@@ -348,6 +356,47 @@ public class RelayService : IRecipient<OrganizationConfigurationChanged>, IRecip
     public void Receive(EventConfigurationChanged message)
     {
         _ = SendCachedMessagesAsync();
+    }
+
+    /// <summary>
+    /// Handles the reception of competitor metadata updates.
+    /// </summary>
+    /// <param name="message">Contains the latest parsed competitor data.</param>
+    public void Receive(CompetitorMetadataUpdate message)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                if (eventService.Event != null)
+                {
+                    foreach (var cm in message.CompetitorMetadata)
+                    {
+                        cm.EventId = eventService.Event.Id;
+                    }
+
+                    var changedCms = eventDataCache.UpdateCompetitorMetadataWithChanges(message.CompetitorMetadata);
+                    if (changedCms.Count > 0)
+                    {
+                        Logger.LogDebug("Sending competitor metadata to hub: {0}", changedCms.Count);
+                        await hubClient.SendCompetitorMetadataAsync(eventService.Event.Id, changedCms);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to send competitor metadata to hub");
+            }
+        });
+    }
+
+    private async Task SendCachedCompetitorMetadataAsync()
+    {
+        var cms = eventDataCache.GetCompetitorMetadata();
+        if (cms.Count != 0 && eventService.Event != null)
+        {
+            await hubClient.SendCompetitorMetadataAsync(eventService.Event.Id, cms);
+        }
     }
 
     #endregion

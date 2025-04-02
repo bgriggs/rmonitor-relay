@@ -99,7 +99,7 @@ public class HubClient : HubClientBase
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to send session update");
+            Logger.LogError(ex, "Failed to send loop update");
             return false;
         }
         return true;
@@ -143,7 +143,29 @@ public class HubClient : HubClientBase
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to send passings");
+            Logger.LogError(ex, "Failed to send flags");
+            return false;
+        }
+        return true;
+    }
+
+    public async Task<bool> SendCompetitorMetadataAsync(int eventId, List<CompetitorMetadata> competitorMetadata)
+    {
+        try
+        {
+            if (hub is null || hub.State != HubConnectionState.Connected)
+            {
+                Logger.LogTrace("Hub not connected, unable to send passings");
+                return false;
+            }
+
+            await hub.SendAsync("SendCompetitorMetadata", eventId, competitorMetadata, stoppingToken);
+            MessagesSent++;
+            WeakReferenceMessenger.Default.Send(new HubMessageStatistic(MessagesSent));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to send competitor metadata");
             return false;
         }
         return true;

@@ -36,6 +36,8 @@ public class EventDataCache
     private readonly List<FlagDuration> flags = [];
     private Flags lastFlag = Flags.Unknown;
 
+    private readonly Dictionary<string, CompetitorMetadata> competitors = [];
+
 
     public EventDataCache()
     {
@@ -268,6 +270,48 @@ public class EventDataCache
             var result = passings.Values.ToList();
             passings.Clear();
             return result;
+        }
+    }
+
+    #endregion
+
+    #region Competitor Metadata
+
+    /// <summary>
+    /// Updates and retrieves the list of competitor metadata that has changed.
+    /// </summary>
+    /// <returns>Returns a list of CompetitorMetadata that has changed.</returns>
+    public List<CompetitorMetadata> UpdateCompetitorMetadataWithChanges(List<CompetitorMetadata> cms)
+    {
+        var changedCompetitors = new List<CompetitorMetadata>();
+        lock (competitors)
+        {
+            foreach (var cm in cms)
+            {
+                if (competitors.TryGetValue(cm.CarNumber, out var last))
+                {
+                    if (cm.LastUpdated > last.LastUpdated)
+                    {
+                        competitors[cm.CarNumber] = cm;
+                        changedCompetitors.Add(cm);
+                    }
+                }
+                else
+                {
+                    competitors[cm.CarNumber] = cm;
+                    changedCompetitors.Add(cm);
+                }
+            }
+        }
+
+        return changedCompetitors;
+    }
+
+    public List<CompetitorMetadata> GetCompetitorMetadata()
+    {
+        lock (competitors)
+        {
+            return [.. competitors.Values];
         }
     }
 

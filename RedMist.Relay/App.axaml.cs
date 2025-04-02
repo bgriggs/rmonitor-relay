@@ -84,6 +84,8 @@ public partial class App : Application
 
             desktop.MainWindow = _host.Services.GetRequiredService<MainWindow>();
             desktop.ShutdownRequested += OnShutdownRequested;
+
+            _host.Services.GetRequiredService<OrbitsLogService>().Initialize();
         }
 
         // Startup background services
@@ -105,6 +107,7 @@ public partial class App : Application
     [Singleton(typeof(EventManagementClient))]
     [Singleton(typeof(EventService))]
     [Singleton(typeof(OrganizationConfigurationService))]
+    [Singleton(typeof(OrbitsLogService))]
     internal static partial void ConfigureServices(IServiceCollection services);
 
     [Singleton(typeof(MainViewModel))]

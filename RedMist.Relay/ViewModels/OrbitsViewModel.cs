@@ -13,12 +13,13 @@ using RedMist.Relay.Models;
 using RedMist.Relay.Services;
 using RedMist.TimingCommon.Models.Configuration;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace RedMist.Relay.ViewModels;
 
-public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorMessageStatistic>, 
+public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorMessageStatistic>,
     IRecipient<OrbitsConnectionState>, IRecipient<OrganizationConfigurationChanged>
 {
     private ILogger Logger { get; }
@@ -143,6 +144,15 @@ public partial class OrbitsViewModel : ObservableValidator, IRecipient<RMonitorM
         else
         {
             OrbitsLogsConnectionState = ConnectionState.Disconnected;
+        }
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(OrbitsLogsConnectionState))
+        {
+            WeakReferenceMessenger.Default.Send(new OrbitsLogConnectionChanged());
         }
     }
 }
